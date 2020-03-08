@@ -1,0 +1,26 @@
+{
+	"name": "@mi-sec/wol",
+	"version": "1.0.0",
+	"description": "Wake-On-LAN utility",
+	"type": "module",
+	"main": "index.js",
+	"scripts": {
+		"lint": "eslint .",
+		"test": "mocha"
+	},
+	"keywords": [],
+	"author": "MI-SEC",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/mi-sec/netx.git"
+	},
+	"homepage": "https://github.com/mi-sec/netx",
+	"bugs": {
+		"url": "https://github.com/mi-sec/netx/issues"
+	},
+	"devDependencies": {
+		"chai": "4.2.0",
+		"mocha": "7.1.0"
+	}
+}
