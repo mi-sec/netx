@@ -11,7 +11,7 @@
  * a mac address is a 6 byte combination of hex characters typically delineated by `:`
  * @type {number}
  */
-export const MAC_BYTES      = 6;
+export const MAC_BYTES = 6;
 
 /**
  * MAC_MAX_LENGTH
@@ -44,7 +44,7 @@ function macAddress( mac ) {
 		macHex = mac.match( /([a-f0-9]+)/ig ).join( '' );
 
 	if ( macHex.length !== MAC_MAX_LENGTH ) {
-		throw new Error( `malformed MAC address "${ mac }"` );
+		throw new Error( `malformed IEEE 802 MAC-48 address "${ mac }"` );
 	}
 
 	for ( let i = 0; i < MAC_BYTES; i++ ) {

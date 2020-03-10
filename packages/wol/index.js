@@ -34,7 +34,8 @@ export default async function wakeOnLan( mac, opts = {} ) {
 
 	const
 		magicPacket = createMagicPacket( mac ),
-		socket      = dgram.createSocket( net.isIPv6( opts.address ) ? 'udp6' : 'udp4' );
+		udpType     = net.isIPv6( opts.address ) ? 'udp6' : 'udp4',
+		socket      = dgram.createSocket( udpType );
 
 	function wait( t ) {
 		return new Promise(

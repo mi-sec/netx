@@ -9,8 +9,7 @@ import chai from 'chai';
 
 const { expect } = chai;
 
-import { createMagicPacket } from '../index.js';
-import wakeOnLan             from '../index.js';
+import wakeOnLan, { createMagicPacket } from '../index.js';
 
 describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version }`, function() {
 	it( 'createMagicPacket should create a magic packet (0-mac)', () => {

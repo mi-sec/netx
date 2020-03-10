@@ -44,6 +44,6 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 
 	it( 'expect malformed MAC Address to throw error', () => {
 		expect( () => macAddress( '1234567890ZZ' ) )
-			.to.throw( 'malformed MAC address "1234567890ZZ"' );
+			.to.throw( 'malformed IEEE 802 MAC-48 address "1234567890ZZ"' );
 	} );
 } );
