@@ -9,7 +9,7 @@ import chai from 'chai';
 
 const { expect } = chai;
 
-import macAddress, { MAC_BYTES } from '../index.js';
+import macAddress, { isValidMACAddress, MAC_BYTES } from '../lib/mac-address.js';
 
 describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version }`, function() {
 	it( 'convert 0x0 MAC Address with any delimiter to buffer', () => {
@@ -45,5 +45,30 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 	it( 'expect malformed MAC Address to throw error', () => {
 		expect( () => macAddress( '1234567890ZZ' ) )
 			.to.throw( 'malformed IEEE 802 MAC-48 address "1234567890ZZ"' );
+	} );
+
+	it( 'should validate MAC Address (canonical)', () => {
+		expect( isValidMACAddress( '00:00:00:00:00:00' ) )
+			.to.eq( true );
+	} );
+
+	it( 'should validate MAC Address (Windows)', () => {
+		expect( isValidMACAddress( '00-00-00-00-00-00' ) )
+			.to.eq( true );
+	} );
+
+	it( 'should validate MAC Address (Hewlett-Packard switches)', () => {
+		expect( isValidMACAddress( '000000-000000' ) )
+			.to.eq( true );
+	} );
+
+	it( 'should validate MAC Address (Intel Landesk)', () => {
+		expect( isValidMACAddress( '000000000000' ) )
+			.to.eq( true );
+	} );
+
+	it( 'should validate MAC Address (malformed)', () => {
+		expect( isValidMACAddress( '1234567890ZZ' ) )
+			.to.eq( false );
 	} );
 } );

@@ -3,24 +3,37 @@
 	"version": "1.0.1",
 	"description": "MAC Address utility",
 	"type": "module",
-	"main": "index.js",
+	"main": "lib/mac-address.js",
 	"scripts": {
 		"lint": "eslint .",
 		"test": "mocha"
 	},
-	"keywords": [],
+	"directories": {
+		"lib": "lib"
+	},
+	"files": [
+		"lib"
+	],
+	"keywords": [
+		"netx",
+		"mac-address"
+	],
 	"author": "MI-SEC",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
 		"url": "git://github.com/mi-sec/netx.git"
 	},
-	"homepage": "https://github.com/mi-sec/netx",
+	"homepage": "https://github.com/mi-sec/netx#readme",
 	"bugs": {
 		"url": "https://github.com/mi-sec/netx/issues"
 	},
 	"devDependencies": {
 		"chai": "4.2.0",
 		"mocha": "7.1.0"
-	}
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"gitHead": "8c01b2355a814c21f472496e02a3b67c722b4af2"
 }

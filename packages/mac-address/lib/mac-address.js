@@ -21,6 +21,26 @@ export const MAC_BYTES = 6;
  */
 export const MAC_MAX_LENGTH = 12;
 
+export function isValidMACAddress( mac ) {
+	if ( !mac ) {
+		throw new Error( 'mac address is required' );
+	}
+	else if ( typeof mac !== 'string' ) {
+		throw new Error( 'mac address must be a string' );
+	}
+
+	return mac && (
+		// xx:xx:xx:xx:xx:xx (canonical)
+		/^(?:[\da-f]{1,2}:){5}[\da-f]{1,2}$/.test( mac ) ||
+		// xx-xx-xx-xx-xx-xx (Windows)
+		/^(?:[\da-f]{1,2}-){5}[\da-f]{1,2}$/.test( mac ) ||
+		// xxxxxx-xxxxxx (Hewlett-Packard switches)
+		/^[\da-f]{6}-[\da-f]{6}$/.test( mac ) ||
+		// xxxxxxxxxxxx (Intel Landesk)
+		/^[\da-f]{12}$/.test( mac )
+	);
+}
+
 /**
  * macAddress
  * @description
