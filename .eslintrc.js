@@ -57,8 +57,7 @@ module.exports = {
 		'max-params': [ 'warn', 6 ],
 		'max-statements': [ 'warn', 30 ],
 		'accessor-pairs': 'off',
-		// 'arrow-parens': [ 'warn', 'always' ],
-		'arrow-parens': 'off',
+		'arrow-parens': [ 'error', 'always' ],
 		'arrow-spacing': [
 			'warn',
 			{
