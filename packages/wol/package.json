@@ -18,10 +18,12 @@
 		"test": "mocha"
 	},
 	"directories": {
-		"lib": "lib"
+		"lib": "lib",
+		"cjs": "cjs"
 	},
 	"files": [
-		"lib"
+		"lib",
+		"cjs"
 	],
 	"keywords": [
 		"netx",
