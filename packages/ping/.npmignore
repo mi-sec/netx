@@ -4,8 +4,4 @@
 .editorconfig
 .eslint*
 
-build
-docs
-storage
 test
-tools

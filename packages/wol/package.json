@@ -3,8 +3,17 @@
 	"version": "1.0.3",
 	"description": "Wake-On-LAN utility",
 	"type": "module",
-	"main": "lib/wol.js",
+	"main": "./cjs/wol.js",
+	"module": "./lib/wol.js",
+	"exports": {
+		".": {
+			"require": "./cjs/wol.js",
+			"default": "./lib/wol.js"
+		}
+	},
 	"scripts": {
+		"build": "webpack --config webpack.config.cjs",
+		"postbuild": "echo '{\n    \"type\": \"commonjs\"\n}' > ./cjs/package.json",
 		"lint": "eslint .",
 		"test": "mocha"
 	},
@@ -29,11 +38,13 @@
 		"url": "https://github.com/mi-sec/netx/issues"
 	},
 	"dependencies": {
-		"@mi-sec/mac-address": "^1.0.3"
+		"@mi-sec/mac-address": "*"
 	},
 	"devDependencies": {
 		"chai": "4.2.0",
-		"mocha": "7.1.1"
+		"mocha": "7.1.1",
+		"webpack": "4.42.1",
+		"webpack-cli": "3.3.11"
 	},
 	"publishConfig": {
 		"access": "public"

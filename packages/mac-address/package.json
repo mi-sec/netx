@@ -3,8 +3,17 @@
 	"version": "1.0.3",
 	"description": "MAC Address utility",
 	"type": "module",
-	"main": "lib/mac-address.js",
+	"main": "./cjs/mac-address.js",
+	"module": "./lib/mac-address.js",
+	"exports": {
+		".": {
+			"require": "./cjs/mac-address.js",
+			"default": "./lib/mac-address.js"
+		}
+	},
 	"scripts": {
+		"build": "webpack --config webpack.config.cjs",
+		"postbuild": "echo '{\n    \"type\": \"commonjs\"\n}' > ./cjs/package.json",
 		"lint": "eslint .",
 		"test": "mocha"
 	},
@@ -30,7 +39,9 @@
 	},
 	"devDependencies": {
 		"chai": "4.2.0",
-		"mocha": "7.1.1"
+		"mocha": "7.1.1",
+		"webpack": "4.42.1",
+		"webpack-cli": "3.3.11"
 	},
 	"publishConfig": {
 		"access": "public"
