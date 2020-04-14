@@ -1,6 +1,6 @@
 {
 	"name": "@mi-sec/wol",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "Wake-On-LAN utility",
 	"type": "module",
 	"main": "lib/wol.js",
@@ -29,7 +29,7 @@
 		"url": "https://github.com/mi-sec/netx/issues"
 	},
 	"dependencies": {
-		"@mi-sec/mac-address": "1.0.2"
+		"@mi-sec/mac-address": "^1.0.3"
 	},
 	"devDependencies": {
 		"chai": "4.2.0",

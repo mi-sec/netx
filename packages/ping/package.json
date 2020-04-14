@@ -1,6 +1,6 @@
 {
 	"name": "@mi-sec/ping",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "create and send ICMP ping",
 	"type": "module",
 	"main": "lib/ping.js",
