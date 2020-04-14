@@ -1,0 +1,57 @@
+{
+	"name": "@mi-sec/port-scanner",
+	"version": "1.0.0",
+	"description": "simple port scanner utility",
+	"type": "module",
+	"gypfile": true,
+	"main": "./cjs/port-scanner.js",
+	"module": "./lib/port-scanner.js",
+	"exports": {
+		".": {
+			"require": "./cjs/port-scanner.js",
+			"default": "./lib/port-scanner.js"
+		}
+	},
+	"scripts": {
+		"build": "node-gyp configure && node-gyp build && webpack --config webpack.config.cjs",
+		"postbuild": "echo '{\n    \"type\": \"commonjs\"\n}' > ./cjs/package.json",
+		"lint": "eslint .",
+		"test": "mocha"
+	},
+	"directories": {
+		"lib": "lib",
+		"cjs": "cjs"
+	},
+	"files": [
+		"lib",
+		"cjs"
+	],
+	"keywords": [
+		"netx",
+		"mac-address"
+	],
+	"author": "MI-SEC",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/mi-sec/netx.git"
+	},
+	"homepage": "https://github.com/mi-sec/netx#readme",
+	"bugs": {
+		"url": "https://github.com/mi-sec/netx/issues"
+	},
+	"dependencies": {
+		"bindings": "1.5.0",
+		"cmake-js": "6.1.0",
+		"node-addon-api": "2.0.0"
+	},
+	"devDependencies": {
+		"chai": "4.2.0",
+		"mocha": "7.1.1",
+		"webpack": "4.42.1",
+		"webpack-cli": "3.3.11"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}
