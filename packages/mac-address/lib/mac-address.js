@@ -31,13 +31,13 @@ export function isValidMACAddress( mac ) {
 
 	return mac && (
 		// xx:xx:xx:xx:xx:xx (canonical)
-		/^(?:[\da-f]{1,2}:){5}[\da-f]{1,2}$/.test( mac ) ||
+		/^(?:[\da-f]{1,2}:){5}[\da-f]{1,2}$/i.test( mac ) ||
 		// xx-xx-xx-xx-xx-xx (Windows)
-		/^(?:[\da-f]{1,2}-){5}[\da-f]{1,2}$/.test( mac ) ||
+		/^(?:[\da-f]{1,2}-){5}[\da-f]{1,2}$/i.test( mac ) ||
 		// xxxxxx-xxxxxx (Hewlett-Packard switches)
-		/^[\da-f]{6}-[\da-f]{6}$/.test( mac ) ||
+		/^[\da-f]{6}-[\da-f]{6}$/i.test( mac ) ||
 		// xxxxxxxxxxxx (Intel Landesk)
-		/^[\da-f]{12}$/.test( mac )
+		/^[\da-f]{12}$/i.test( mac )
 	);
 }
 

@@ -50,10 +50,16 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 	it( 'should validate MAC Address (canonical)', () => {
 		expect( isValidMACAddress( '00:00:00:00:00:00' ) )
 			.to.eq( true );
+
+		expect( isValidMACAddress( 'AA:AA:AA:AA:AA:AA' ) )
+			.to.eq( true );
 	} );
 
 	it( 'should validate MAC Address (Windows)', () => {
 		expect( isValidMACAddress( '00-00-00-00-00-00' ) )
+			.to.eq( true );
+
+		expect( isValidMACAddress( 'AA-AA-AA-AA-AA-AA' ) )
 			.to.eq( true );
 	} );
 
