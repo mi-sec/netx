@@ -7,3 +7,5 @@
 Napi::String ping( const Napi::CallbackInfo &info );
 
 Napi::Boolean portState( const Napi::CallbackInfo &info );
+
+Napi::Promise portScan( const Napi::CallbackInfo &info );

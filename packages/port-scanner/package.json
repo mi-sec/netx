@@ -13,9 +13,10 @@
 		}
 	},
 	"scripts": {
-		"build": "node-gyp configure && node-gyp build && webpack --config webpack.config.cjs",
-		"postbuild": "echo '{\n    \"type\": \"commonjs\"\n}' > ./cjs/package.json",
+		"build": "cmake-js reconfigure && cmake-js compile && webpack --config webpack.config.cjs",
+		"install": "cmake-js compile",
 		"lint": "eslint .",
+		"postbuild": "echo '{\n    \"type\": \"commonjs\"\n}' > ./cjs/package.json",
 		"test": "mocha"
 	},
 	"directories": {
@@ -42,12 +43,13 @@
 	},
 	"dependencies": {
 		"bindings": "1.5.0",
-		"cmake-js": "6.1.0",
-		"node-addon-api": "2.0.0"
+		"boost-lib": "0.11.3"
 	},
 	"devDependencies": {
 		"chai": "4.2.0",
+		"cmake-js": "6.1.0",
 		"mocha": "7.1.1",
+		"node-addon-api": "2.0.0",
 		"webpack": "4.42.1",
 		"webpack-cli": "3.3.11"
 	},

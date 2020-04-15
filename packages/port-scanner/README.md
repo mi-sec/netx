@@ -2,6 +2,8 @@
 
 > MAC Address utility
 
+[![npm version](https://img.shields.io/npm/v/@mi-sec/mac-address.svg)](https://www.npmjs.com/package/@mi-sec/mac-address)
+
 ## Usage
 
 ```

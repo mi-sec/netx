@@ -14,6 +14,11 @@ Napi::Object Init( Napi::Env env, Napi::Object exports ) {
 		Napi::Function::New( env, portState )
 	);
 	
+	exports.Set(
+		Napi::String::New( env, "portScan" ),
+		Napi::Function::New( env, portScan )
+	);
+	
 	// return `exports` object (always)
 	return exports;
 }
