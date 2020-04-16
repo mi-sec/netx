@@ -176,6 +176,10 @@ export function connect( host, port, opts = {} ) {
 				if ( status === 'open' ) {
 					data.banner = banner;
 					data.time   = time;
+
+					if ( opts.attemptToIdentify ) {
+						data.service = commonPorts.get( port ) || 'unknown';
+					}
 				}
 
 				error = e && !connectionRefused ? error || e : null;
@@ -193,11 +197,12 @@ export function connect( host, port, opts = {} ) {
 }
 
 export async function scan( opts = {} ) {
-	opts.host           = opts.host || '127.0.0.1';
-	opts.port           = opts.port || [ ...commonPorts.keys() ];
-	opts.timeout        = opts.timeout || 400;
-	opts.onlyReportOpen = opts.hasOwnProperty( 'onlyReportOpen' ) ? opts.onlyReportOpen : true;
-	opts.bannerGrab     = opts.hasOwnProperty( 'bannerGrab' ) ? opts.bannerGrab : true;
+	opts.host              = opts.host || '127.0.0.1';
+	opts.port              = opts.port || [ ...commonPorts.keys() ];
+	opts.timeout           = opts.timeout || 400;
+	opts.onlyReportOpen    = opts.hasOwnProperty( 'onlyReportOpen' ) ? opts.onlyReportOpen : true;
+	opts.bannerGrab        = opts.hasOwnProperty( 'bannerGrab' ) ? opts.bannerGrab : true;
+	opts.attemptToIdentify = opts.hasOwnProperty( 'attemptToIdentify' ) ? opts.attemptToIdentify : true;
 
 	let result = [];
 	for ( let i = 0; i < opts.port.length; i++ ) {

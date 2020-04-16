@@ -13,8 +13,7 @@
 		}
 	},
 	"scripts": {
-		"build": "cmake-js reconfigure && cmake-js compile && webpack --config webpack.config.cjs",
-		"install": "cmake-js compile",
+		"build": "webpack --config webpack.config.cjs",
 		"lint": "eslint .",
 		"postbuild": "echo '{\n    \"type\": \"commonjs\"\n}' > ./cjs/package.json",
 		"test": "mocha"
