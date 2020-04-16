@@ -1,6 +1,6 @@
 {
 	"name": "@mi-sec/wol",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"description": "Wake-On-LAN utility",
 	"type": "module",
 	"main": "./cjs/wol.js",
