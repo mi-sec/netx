@@ -6,8 +6,10 @@ port scanner utility
     - CommonJS, ECMAScript Modules and UMD builds
     - Node >= 13.2.x (8, 10, 12 in progress)
 
+[![port-scanner unit test](https://github.com/mi-sec/netx/workflows/port-scanner%20unit%20test/badge.svg)](https://github.com/mi-sec/netx/actions?query=workflow:"port-scanner+unit+test")
+[![port-scanner lint test](https://github.com/mi-sec/netx/workflows/port-scanner%20lint%20test/badge.svg)](https://github.com/mi-sec/netx/actions?query=workflow:"port-scanner+lint+test")
+
 [![npm version](https://img.shields.io/npm/v/@mi-sec/port-scanner.svg)](https://www.npmjs.com/package/@mi-sec/port-scanner)
-[![Build Status](https://github.com/mi-sec/netx/workflows/CI/badge.svg)](https://github.com/mi-sec/netx/actions)
 [![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lerna.js.org/)
 
 ### Usage
