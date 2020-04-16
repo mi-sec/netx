@@ -1,0 +1,20 @@
+name: mac-address lint test
+
+on:
+  push:
+    paths:
+      - 'packages/mac-address/**'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: "Lint: Use Node.js 12.x"
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: Install dependencies
+        run: npm ci --silent --prefix packages/mac-address/
+      - name: lint
+        run: npm run --prefix packages/mac-address/ lint

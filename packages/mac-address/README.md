@@ -6,8 +6,10 @@ MAC Address utility for parsing and validating MAC Addresses
     - CommonJS, ECMAScript Modules and UMD builds
     - Node >= 13.2.x (8, 10, 12 in progress)
 
+[![mac-address unit test](https://github.com/mi-sec/netx/workflows/mac-address%20unit%20test/badge.svg)](https://github.com/mi-sec/netx/actions?query=workflow:"mac-address+unit+test")
+[![mac-address lint test](https://github.com/mi-sec/netx/workflows/mac-address%20lint%20test/badge.svg)](https://github.com/mi-sec/netx/actions?query=workflow:"mac-address+lint+test")
+
 [![npm version](https://img.shields.io/npm/v/@mi-sec/mac-address.svg)](https://www.npmjs.com/package/@mi-sec/mac-address)
-[![Build Status](https://github.com/mi-sec/netx/workflows/CI/badge.svg)](https://github.com/mi-sec/netx/actions)
 [![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lerna.js.org/)
 
 ### Usage
