@@ -4,7 +4,7 @@ MAC Address utility for parsing and validating MAC Addresses
 
 - Cross-platform - Support for:
     - CommonJS, ECMAScript Modules and UMD builds
-    - Node 8, 10, 12
+    - Node >= 13.2.x (8, 10, 12 in progress)
 
 [![npm version](https://img.shields.io/npm/v/@mi-sec/mac-address.svg)](https://www.npmjs.com/package/@mi-sec/mac-address)
 [![Build Status](https://github.com/mi-sec/netx/workflows/CI/badge.svg)](https://github.com/mi-sec/netx/actions)
