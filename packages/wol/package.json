@@ -13,8 +13,8 @@
 	},
 	"scripts": {
 		"build": "webpack --config webpack.config.cjs",
-		"postbuild": "echo '{\n    \"type\": \"commonjs\"\n}' > ./cjs/package.json",
 		"lint": "eslint .",
+		"postbuild": "echo '{\n    \"type\": \"commonjs\"\n}' > ./cjs/package.json",
 		"test": "mocha"
 	},
 	"directories": {
