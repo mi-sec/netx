@@ -1,14 +1,15 @@
 {
-	"name": "@mi-sec/wol",
-	"version": "1.0.5",
-	"description": "Wake-On-LAN utility",
+	"name": "@mi-sec/port-scanner",
+	"version": "1.0.0",
+	"description": "simple port scanner utility",
 	"type": "module",
-	"main": "./cjs/wol.js",
-	"module": "./lib/wol.js",
+	"gypfile": true,
+	"main": "./cjs/port-scanner.js",
+	"module": "./lib/port-scanner.js",
 	"exports": {
 		".": {
-			"require": "./cjs/wol.js",
-			"default": "./lib/wol.js"
+			"require": "./cjs/port-scanner.js",
+			"default": "./lib/port-scanner.js"
 		}
 	},
 	"scripts": {
@@ -27,7 +28,7 @@
 	],
 	"keywords": [
 		"netx",
-		"wake-on-lan"
+		"mac-address"
 	],
 	"author": "MI-SEC",
 	"license": "MIT",
@@ -40,7 +41,7 @@
 		"url": "https://github.com/mi-sec/netx/issues"
 	},
 	"dependencies": {
-		"@mi-sec/mac-address": "^1.0.5"
+		"@mi-sec/lightmap": "0.1.6"
 	},
 	"devDependencies": {
 		"chai": "4.2.0",
@@ -50,6 +51,5 @@
 	},
 	"publishConfig": {
 		"access": "public"
-	},
-	"gitHead": "8c01b2355a814c21f472496e02a3b67c722b4af2"
+	}
 }
