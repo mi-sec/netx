@@ -5,8 +5,8 @@
  *******************************************************************************************************/
 'use strict';
 
-import net      from 'net';
-import LightMap from '@mi-sec/lightmap';
+import { createConnection } from 'net';
+import LightMap             from '@mi-sec/lightmap';
 
 export const commonPorts = new LightMap( [
 	[ 7, 'echo' ],
@@ -111,11 +111,13 @@ export const commonPorts = new LightMap( [
 	[ 49157, 'unknown' ]
 ] );
 
-function convertHighResolutionTime( t ) {
+export function convertHighResolutionTime( t ) {
 	return ( ( t[ 0 ] * 1e9 ) + t[ 1 ] ) / 1e6;
 }
 
 export function connect( host, port, opts = {} ) {
+	!opts.debug || console.log( `scanning ${ host }:${ port }` );
+
 	return new Promise(
 		( res, rej ) => {
 			const
@@ -128,12 +130,15 @@ export function connect( host, port, opts = {} ) {
 				connectionRefused = false,
 				time              = process.hrtime();
 
-			const socket = net.createConnection( { port, host } );
+			const socket = createConnection( { port, host } );
 
 			socket.on( 'connect', () => {
 				const end = process.hrtime( time );
 				time      = convertHighResolutionTime( end );
-				status    = 'open';
+
+				!opts.debug || console.log( `${ host }:${ port } connected in ${ time }ms` );
+
+				status = 'open';
 				socket.end();
 			} );
 
@@ -146,12 +151,16 @@ export function connect( host, port, opts = {} ) {
 
 			socket.setTimeout( timeout );
 			socket.on( 'timeout', () => {
+				!opts.debug || console.log( `${ host }:${ port } timeout` );
+
 				status = 'closed';
 				error  = new Error( 'timeout' );
 				socket.end();
 			} );
 
 			socket.on( 'error', ( e ) => {
+				!opts.debug || console.log( `${ host }:${ port } error` );
+
 				status = 'closed';
 
 				if ( e.code !== 'ECONNREFUSED' ) {
@@ -185,6 +194,8 @@ export function connect( host, port, opts = {} ) {
 				error = e && !connectionRefused ? error || e : null;
 
 				if ( error ) {
+					!opts.debug || console.log( `${ host }:${ port } error` );
+
 					data.error = error;
 					rej( data );
 				}
@@ -197,12 +208,25 @@ export function connect( host, port, opts = {} ) {
 }
 
 export async function scan( opts = {} ) {
-	opts.host              = opts.host || '127.0.0.1';
-	opts.port              = opts.port || [ ...commonPorts.keys() ];
-	opts.timeout           = opts.timeout || 400;
+	opts.host    = opts.host || '127.0.0.1';
+	opts.port    = opts.port ?
+		Array.isArray( opts.port ) ? opts.port : [ opts.port ] :
+		[ ...commonPorts.keys() ];
+	opts.timeout = opts.timeout || 500;
+
+	opts.debug             = opts.hasOwnProperty( 'debug' ) ? opts.debug : false;
 	opts.onlyReportOpen    = opts.hasOwnProperty( 'onlyReportOpen' ) ? opts.onlyReportOpen : true;
 	opts.bannerGrab        = opts.hasOwnProperty( 'bannerGrab' ) ? opts.bannerGrab : true;
 	opts.attemptToIdentify = opts.hasOwnProperty( 'attemptToIdentify' ) ? opts.attemptToIdentify : true;
+
+	!opts.debug || console.log( 'starting scan with options' );
+	!opts.debug || console.log( `  host: ${ opts.host }` );
+	!opts.debug || console.log( `  ports: ${ opts.port }` );
+	!opts.debug || console.log( `  timeout: ${ opts.timeout }` );
+	!opts.debug || console.log( `  debug: ${ opts.debug }` );
+	!opts.debug || console.log( `  onlyReportOpen: ${ opts.onlyReportOpen }` );
+	!opts.debug || console.log( `  bannerGrab: ${ opts.bannerGrab }` );
+	!opts.debug || console.log( `  attemptToIdentify: ${ opts.attemptToIdentify }` );
 
 	let result = [];
 	for ( let i = 0; i < opts.port.length; i++ ) {
@@ -210,7 +234,7 @@ export async function scan( opts = {} ) {
 	}
 
 	result = await Promise.all( result );
-	result = result.filter( i => !!i );
+	result = result.filter( ( i ) => !!i );
 
 	return result;
 }

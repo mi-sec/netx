@@ -5,37 +5,78 @@
  *******************************************************************************************************/
 'use strict';
 
+import net  from 'net';
 import chai from 'chai';
 
 const { expect } = chai;
 
-import { scan } from '../lib/port-scanner.js';
-
-function convertHighResolutionTime( hrtime ) {
-	const
-		nano    = ( hrtime[ 0 ] * 1e9 ) + hrtime[ 1 ],
-		seconds = nano / 1e9;
-
-	return seconds + 's';
-}
-
+import scan, { convertHighResolutionTime } from '../lib/port-scanner.js';
 
 describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version }`, function() {
-	this.timeout( 10000 );
+	const
+		host   = '127.0.0.1',
+		banner = 'hello\r\n';
 
-	it( 'should scan target address and port', async () => {
-		try {
-			const start = process.hrtime();
+	let server, port;
 
-			const x = await scan( {} );
+	beforeEach( ( done ) => {
+		server = net.createServer( ( socket ) => {
+			socket.write( banner );
+			socket.pipe( socket );
+		} );
 
-			const end = process.hrtime( start );
-			console.log( convertHighResolutionTime( end ) );
+		server.listen( () => {
+			port = server.address().port;
+			done();
+		} );
+	} );
 
-			console.log( x );
-		}
-		catch ( e ) {
-			console.error( 'error\n', e );
-		}
+	afterEach( ( done ) => {
+		server.close( () => done() );
+	} );
+
+	it( `should scan target ${ host } and determine it "open" with banner "hello\\r\\n"`, async () => {
+		const start  = process.hrtime();
+		const result = await scan( { host, port } );
+		const end    = convertHighResolutionTime( process.hrtime( start ) );
+
+		expect( end ).to.be.lte( 5.0 );
+
+		expect( result ).to.be.an( 'array' ).and.have.length( 1 );
+		expect( result[ 0 ] ).to.be.an( 'object' );
+
+		expect( result[ 0 ] ).to.have.property( 'host' ).and.be.a( 'string' ).and.eq( host );
+		expect( result[ 0 ] ).to.have.property( 'port' ).and.be.a( 'number' ).and.eq( port );
+		expect( result[ 0 ] ).to.have.property( 'status' ).and.be.a( 'string' ).and.eq( 'open' );
+		expect( result[ 0 ] ).to.have.property( 'banner' ).and.be.a( 'string' ).and.eq( banner );
+		expect( result[ 0 ] ).to.have.property( 'time' ).and.be.a( 'number' ).and.be.lte( 5.0 );
+		expect( result[ 0 ] ).to.have.property( 'service' ).and.be.a( 'string' ).and.eq( 'unknown' );
+	} );
+
+	it( `should scan target ${ host } and determine it "close"`, async () => {
+		server.close();
+
+		const start  = process.hrtime();
+		const result = await scan( { host, port, onlyReportOpen: false } );
+		const end    = convertHighResolutionTime( process.hrtime( start ) );
+
+		expect( end ).to.be.lte( 5.0 );
+
+		expect( result ).to.be.an( 'array' ).and.have.length( 1 );
+		expect( result[ 0 ] ).to.be.an( 'object' );
+
+		expect( result[ 0 ] ).to.have.property( 'host' ).and.be.a( 'string' ).and.eq( host );
+		expect( result[ 0 ] ).to.have.property( 'port' ).and.be.a( 'number' ).and.eq( port );
+		expect( result[ 0 ] ).to.have.property( 'status' ).and.be.a( 'string' ).and.eq( 'closed' );
+		expect( result[ 0 ] ).to.not.have.property( 'banner' );
+		expect( result[ 0 ] ).to.not.have.property( 'time' );
+		expect( result[ 0 ] ).to.not.have.property( 'service' );
+	} );
+
+	after( ( done ) => {
+		server.close( () => {
+			server = null;
+			done();
+		} );
 	} );
 } );

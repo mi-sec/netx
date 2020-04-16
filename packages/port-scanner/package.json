@@ -41,15 +41,11 @@
 		"url": "https://github.com/mi-sec/netx/issues"
 	},
 	"dependencies": {
-		"@mi-sec/lightmap": "0.1.6",
-		"bindings": "1.5.0",
-		"boost-lib": "0.11.3"
+		"@mi-sec/lightmap": "0.1.6"
 	},
 	"devDependencies": {
 		"chai": "4.2.0",
-		"cmake-js": "6.1.0",
 		"mocha": "7.1.1",
-		"node-addon-api": "2.0.0",
 		"webpack": "4.42.1",
 		"webpack-cli": "3.3.11"
 	},
