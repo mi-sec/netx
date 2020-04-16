@@ -40,7 +40,7 @@
 		"url": "https://github.com/mi-sec/netx/issues"
 	},
 	"dependencies": {
-		"@mi-sec/mac-address": "*"
+		"@mi-sec/mac-address": "latest"
 	},
 	"devDependencies": {
 		"chai": "4.2.0",
