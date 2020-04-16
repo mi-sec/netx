@@ -6,8 +6,10 @@ Wake-On-LAN utility
     - CommonJS, ECMAScript Modules and UMD builds
     - Node >= 13.2.x (8, 10, 12 in progress)
 
+[![wol unit test](https://github.com/mi-sec/netx/workflows/wol%20unit%20test/badge.svg)](https://github.com/mi-sec/netx/actions?query=workflow:"wol+unit+test")
+[![wol lint test](https://github.com/mi-sec/netx/workflows/wol%20lint%20test/badge.svg)](https://github.com/mi-sec/netx/actions?query=workflow:"wol+lint+test")
+
 [![npm version](https://img.shields.io/npm/v/@mi-sec/wol.svg)](https://www.npmjs.com/package/@mi-sec/wol)
-[![Build Status](https://github.com/mi-sec/netx/workflows/CI/badge.svg)](https://github.com/mi-sec/netx/actions)
 [![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lerna.js.org/)
 
 ### Usage
