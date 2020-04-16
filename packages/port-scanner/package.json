@@ -3,7 +3,6 @@
 	"version": "1.0.0",
 	"description": "simple port scanner utility",
 	"type": "module",
-	"gypfile": true,
 	"main": "./cjs/port-scanner.js",
 	"module": "./lib/port-scanner.js",
 	"exports": {
@@ -28,7 +27,7 @@
 	],
 	"keywords": [
 		"netx",
-		"mac-address"
+		"port-scanner"
 	],
 	"author": "MI-SEC",
 	"license": "MIT",

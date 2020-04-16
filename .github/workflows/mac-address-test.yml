@@ -6,7 +6,20 @@ on:
       - 'packages/mac-address/**'
 
 jobs:
-  ci:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: "Lint: Use Node.js 12.x"
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: Install dependencies
+        run: npm ci --silent --prefix packages/mac-address/
+      - name: lint
+        run: npm run --prefix packages/mac-address/ lint
+
+  test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -15,16 +28,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: "Test: Use Node.js ${{ matrix.node-version }}"
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm install
-      - name: lint
-        run: npm run lint
-        env:
-          CI: true
+      - name: Install dependencies
+        run: npm ci --silent --prefix packages/mac-address/
       - name: test
-        run: npm run test
-        env:
-          CI: true
+        run: npm run --prefix packages/mac-address/ test
