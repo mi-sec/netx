@@ -4,7 +4,7 @@ port scanner utility
 
 - Cross-platform - Support for:
     - CommonJS, ECMAScript Modules and UMD builds
-    - Node 8, 10, 12
+    - Node >= 13.2.x (8, 10, 12 in progress)
 
 [![npm version](https://img.shields.io/npm/v/@mi-sec/port-scanner.svg)](https://www.npmjs.com/package/@mi-sec/port-scanner)
 [![Build Status](https://github.com/mi-sec/netx/workflows/CI/badge.svg)](https://github.com/mi-sec/netx/actions)
@@ -13,16 +13,28 @@ port scanner utility
 ### Usage
 
 ```
-import macAddress from '@mi-sec/mac-address';
+import scan from '@mi-sec/port-scanner';
 
-macAddress( '12:34:56:78:90:AB' ) -> <Buffer 12 34 56 78 90 ab>
-macAddress( '12-34-56-78-90-AB' ) -> <Buffer 12 34 56 78 90 ab>
-macAddress( '1234567890AB' ) -> <Buffer 12 34 56 78 90 ab>
-macAddress( 0x1234567890AB ) -> <Buffer 12 34 56 78 90 ab>
-macAddress( 20015998341291 ) -> <Buffer 12 34 56 78 90 ab>
+await scan( {
+    host: '127.0.0.1',
+    port: [ 22 ],
+    timeout: 500,
+    onlyReportOpen: true,
+    bannerGrab: true,
+    attemptToIdentify: true
+} );
+```
 
-import { isValidMACAddress } from '@mi-sec/mac-address';
-
-isValidMACAddress( '12:34:56:78:90:AB' ) -> true
-isValidMACAddress( '1234567890ZZ' ) -> false
+Result:
+```
+[
+  {
+    host: '127.0.0.1',
+    port: 22,
+    status: 'open',
+    banner: 'SSH-2.0-OpenSSH_7.9\r\n',
+    time: 4.238488,
+    service: 'ssh'
+  }
+]
 ```
