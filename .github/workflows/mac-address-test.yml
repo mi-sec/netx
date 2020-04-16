@@ -1,0 +1,30 @@
+name: mac-address unit test
+
+on:
+  push:
+    paths:
+      - 'packages/mac-address/**'
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [ 8.x, 10.x, 12.x ]
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+      - name: lint
+        run: npm run lint
+        env:
+          CI: true
+      - name: test
+        run: npm run test
+        env:
+          CI: true
