@@ -67,7 +67,7 @@ async function wakeOnLan( mac, opts = {} ) {
 
 	function wait( t ) {
 		return new Promise(
-			res => setTimeout( () => res(), t )
+			( res ) => setTimeout( () => res(), t )
 		);
 	}
 
@@ -78,7 +78,7 @@ async function wakeOnLan( mac, opts = {} ) {
 				magicPacket.length,
 				opts.port,
 				opts.address,
-				err => err ? rej( err ) : res()
+				( err ) => err ? rej( err ) : res()
 			)
 		);
 	}
