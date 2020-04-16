@@ -2,10 +2,8 @@
 #include <iostream>
 #include <string>
 
-#include <SFML/Network.hpp>
+#include "ScanAsyncWorker.h"
 
 Napi::String ping( const Napi::CallbackInfo &info );
 
-Napi::Boolean portState( const Napi::CallbackInfo &info );
-
-Napi::Promise portScan( const Napi::CallbackInfo &info );
+Napi::Value scan( const Napi::CallbackInfo &info );

@@ -2,7 +2,6 @@
 #include <string>
 #include "scanner.h"
 
-// callback method when module is registered with Node.js
 Napi::Object Init( Napi::Env env, Napi::Object exports ) {
 	exports.Set(
 		Napi::String::New( env, "ping" ),
@@ -10,16 +9,10 @@ Napi::Object Init( Napi::Env env, Napi::Object exports ) {
 	);
 	
 	exports.Set(
-		Napi::String::New( env, "portState" ),
-		Napi::Function::New( env, portState )
+		Napi::String::New( env, "scan" ),
+		Napi::Function::New( env, scan )
 	);
 	
-	exports.Set(
-		Napi::String::New( env, "portScan" ),
-		Napi::Function::New( env, portScan )
-	);
-	
-	// return `exports` object (always)
 	return exports;
 }
 

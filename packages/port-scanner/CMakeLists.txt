@@ -25,13 +25,6 @@ set( SFML_PATH "${CMAKE_SOURCE_DIR}/deps/SFML" )
 message( STATUS SFML_PATH: "${SFML_PATH}" )
 include_directories( ${SFML_PATH}/include )
 file( GLOB LIBRARIES "${SFML_PATH}/build/Release/*.dylib" )
-message( "LIBRARIES = ${LIBRARIES}" )
-
-#add_library( ${PROJECT_NAME}_SFML SHARED "src/init/init-sfml.cpp" )
-#set_target_properties( ${PROJECT_NAME}_SFML PROPERTIES COMPILE_FLAGS -DCPU )
-#set_target_properties( ${PROJECT_NAME}_SFML PROPERTIES PREFIX "" SUFFIX ".node" )
-#target_link_libraries( ${PROJECT_NAME}_SFML "${CMAKE_JS_LIB};${SFML_LIB};${PROJECT_NAME}" )
-#target_link_libraries( ${PROJECT_NAME} "${CMAKE_JS_LIB};${SFML_LIB}" )
 
 # Essential library files to link to a node addon,
 # you should add this line in every CMake.js based project.

@@ -42,6 +42,7 @@
 		"url": "https://github.com/mi-sec/netx/issues"
 	},
 	"dependencies": {
+		"@mi-sec/lightmap": "0.1.6",
 		"bindings": "1.5.0",
 		"boost-lib": "0.11.3"
 	},
