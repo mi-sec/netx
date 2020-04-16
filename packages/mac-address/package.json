@@ -27,7 +27,8 @@
 	],
 	"keywords": [
 		"netx",
-		"mac-address"
+		"mac-address",
+		"mi-sec"
 	],
 	"author": "MI-SEC",
 	"license": "MIT",
