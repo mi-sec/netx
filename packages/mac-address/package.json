@@ -1,6 +1,6 @@
 {
 	"name": "@mi-sec/mac-address",
-	"version": "1.0.6",
+	"version": "1.0.7",
 	"description": "MAC Address utility",
 	"type": "module",
 	"main": "./cjs/mac-address.js",
