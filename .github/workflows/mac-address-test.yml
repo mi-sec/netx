@@ -2,6 +2,8 @@ name: mac-address unit test
 
 on:
   push:
+    tags-ignore:
+      - '*.*'
     paths:
       - 'packages/mac-address/**'
 

@@ -2,6 +2,8 @@ name: port-scanner unit test
 
 on:
   push:
+    tags-ignore:
+      - '*.*'
     paths:
       - 'packages/port-scanner/**'
 

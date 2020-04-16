@@ -2,6 +2,8 @@ name: port-scanner lint test
 
 on:
   push:
+    tags-ignore:
+      - '*.*'
     paths:
       - 'packages/port-scanner/**'
 

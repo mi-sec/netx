@@ -2,6 +2,8 @@ name: wol unit test
 
 on:
   push:
+    tags-ignore:
+      - '*.*'
     paths:
       - 'packages/wol/**'
 
