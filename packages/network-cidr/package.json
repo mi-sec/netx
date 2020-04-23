@@ -27,6 +27,9 @@
 	],
 	"keywords": [
 		"netx",
+		"cidr",
+		"ip",
+		"ip-schema",
 		"network-cidr",
 		"mi-sec"
 	],
