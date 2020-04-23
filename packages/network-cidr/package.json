@@ -1,0 +1,53 @@
+{
+	"name": "@mi-sec/network-cidr",
+	"version": "1.0.0",
+	"description": "network cidr utility",
+	"type": "module",
+	"main": "./cjs/network-cidr.js",
+	"module": "./lib/network-cidr.js",
+	"exports": {
+		".": {
+			"require": "./cjs/network-cidr.js",
+			"default": "./lib/network-cidr.js"
+		}
+	},
+	"scripts": {
+		"build": "webpack --config webpack.config.cjs",
+		"lint": "eslint .",
+		"postbuild": "echo '{\n    \"type\": \"commonjs\"\n}' > ./cjs/package.json",
+		"test": "mocha"
+	},
+	"directories": {
+		"lib": "lib",
+		"cjs": "cjs"
+	},
+	"files": [
+		"lib",
+		"cjs"
+	],
+	"keywords": [
+		"netx",
+		"network-cidr",
+		"mi-sec"
+	],
+	"author": "MI-SEC",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/mi-sec/netx.git"
+	},
+	"homepage": "https://github.com/mi-sec/netx#readme",
+	"bugs": {
+		"url": "https://github.com/mi-sec/netx/issues"
+	},
+	"devDependencies": {
+		"chai": "4.2.0",
+		"eslint": "6.8.0",
+		"mocha": "7.1.1",
+		"webpack": "4.42.1",
+		"webpack-cli": "3.3.11"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}
