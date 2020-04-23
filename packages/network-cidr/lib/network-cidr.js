@@ -16,15 +16,13 @@ class NetworkCidr
 			const ref = net.split( '/', 2 );
 			net       = ref[ 0 ];
 			mask      = ref[ 1 ];
-		}
 
-		if ( !mask ) {
-			const block = net.split( '.' ).filter( i => !!+i ).length;
+			if ( !mask ) {
+				mask = net.split( '.' ).filter( ( i ) => !!+i ).length * 8;
 
-			mask = block * 8;
-
-			if ( !mask || mask > 32 ) {
-				throw new Error( `invalid network address: ${ net }` );
+				if ( !mask || mask > 32 ) {
+					throw new Error( `invalid network address: ${ net }` );
+				}
 			}
 		}
 

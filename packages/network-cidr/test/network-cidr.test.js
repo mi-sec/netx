@@ -11,8 +11,6 @@ const { expect } = chai;
 
 import NetworkCidr from '../lib/network-cidr.js';
 
-import results from './test.results.js';
-
 describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version }`, function() {
 	it( 'longToIp should convert long to ip string', () => {
 		// FF.FF.FF.FF
@@ -185,33 +183,6 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 		} );
 	} );
 
-	function allSubnets( net ) {
-		for ( let mask = 1; mask <= 32; mask++ ) {
-			const randomParamSpread = !( ~~( Math.random() * 10 ) % 2 );
-
-			const block = randomParamSpread ? [ `${ net }/${ mask }` ] : [ net, mask ];
-
-			it( block.join( '/' ), () => {
-				const
-					cidr  = new NetworkCidr( ...block ),
-					rtest = results.find( x => ( x.network === net && x.bitmask === mask ) );
-
-				expect( cidr ).to.be.instanceof( NetworkCidr );
-				expect( cidr.bitmask ).to.be.a( 'number' ).and.eq( rtest.bitmask );
-				expect( cidr.maskLong ).to.be.a( 'number' ).and.eq( rtest.maskLong );
-				expect( cidr.netLong ).to.be.a( 'number' ).and.eq( rtest.netLong );
-				expect( cidr.size ).to.be.a( 'number' ).and.eq( rtest.size );
-				expect( cidr.hosts ).to.be.a( 'number' ).and.eq( rtest.hosts );
-				expect( cidr.base ).to.be.a( 'string' ).and.eq( rtest.base );
-				expect( cidr.mask ).to.be.a( 'string' ).and.eq( rtest.mask );
-				expect( cidr.hostmask ).to.be.a( 'string' ).and.eq( rtest.hostmask );
-				expect( cidr.first ).to.be.a( 'string' ).and.eq( rtest.first );
-				expect( cidr.last ).to.be.a( 'string' ).and.eq( rtest.last );
-				expect( cidr.broadcast ).to.be.a( 'string' ).and.eq( rtest.broadcast );
-			} );
-		}
-	}
-
 	describe( 'class a network', () => {
 		it( '10.0.0.0/8', () => {
 			const cidr = new NetworkCidr( '10.0.0.0/8' );
@@ -228,8 +199,6 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 			expect( cidr.last ).to.be.a( 'string' ).and.eq( '10.255.255.254' );
 			expect( cidr.broadcast ).to.be.a( 'string' ).and.eq( '10.255.255.255' );
 		} );
-
-		allSubnets( '10.10.10.0' );
 	} );
 
 	describe( 'class b network', () => {
@@ -248,8 +217,6 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 			expect( cidr.last ).to.be.a( 'string' ).and.eq( '172.31.255.254' );
 			expect( cidr.broadcast ).to.be.a( 'string' ).and.eq( '172.31.255.255' );
 		} );
-
-		allSubnets( '172.240.127.10' );
 	} );
 
 	describe( 'class c network', () => {
@@ -268,8 +235,6 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 			expect( cidr.last ).to.be.a( 'string' ).and.eq( '192.168.255.254' );
 			expect( cidr.broadcast ).to.be.a( 'string' ).and.eq( '192.168.255.255' );
 		} );
-
-		allSubnets( '192.168.1.1' );
 	} );
 
 } );
