@@ -1,6 +1,6 @@
 {
 	"name": "@mi-sec/port-scanner",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "simple port scanner utility",
 	"type": "module",
 	"main": "./cjs/port-scanner.js",

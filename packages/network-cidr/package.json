@@ -1,6 +1,6 @@
 {
 	"name": "@mi-sec/network-cidr",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "network cidr utility",
 	"type": "module",
 	"main": "./cjs/network-cidr.js",
