@@ -42,9 +42,6 @@ class NetworkCidr
 				this.maskLong = ( 0xFFFFFFFF << ( 32 - this.bitmask ) ) >>> 0;
 			}
 		}
-		else {
-			throw new Error( 'invalid mask: empty' );
-		}
 
 		this.netLong = ( NetworkCidr.ipToLong( net ) & this.maskLong ) >>> 0;
 

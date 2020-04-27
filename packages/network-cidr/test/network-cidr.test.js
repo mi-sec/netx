@@ -36,6 +36,18 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 			.to.equal( 3232235777 );
 	} );
 
+	it( 'should create a NetworkCidr instance', () => {
+		const
+			net  = new NetworkCidr( '192.168.1.0',  ),
+			host = new NetworkCidr( '192.168.1.1' );
+
+		expect( net.constructor.name ).to.eq( 'NetworkCidr' );
+		expect( net.bitmask ).to.eq( 24 );
+
+		expect( host.constructor.name ).to.eq( 'NetworkCidr' );
+		expect( host.bitmask ).to.eq( 32 );
+	} );
+
 	describe( 'expected errors', () => {
 		it( 'should report invalid net parameter', () => {
 			expect( () => new NetworkCidr( 4278190080 ) ).to.throw( 'invalid "net" parameter' );
