@@ -7,6 +7,7 @@
 
 import { createConnection } from 'net';
 import LightMap             from '@mi-sec/lightmap';
+import NetworkCidr          from '@mi-sec/network-cidr';
 
 export const commonPorts = new LightMap( [
 	[ 7, 'echo' ],
@@ -208,7 +209,10 @@ export function connect( host, port, opts = {} ) {
 }
 
 export async function scan( opts = {} ) {
-	opts.host    = opts.host || '127.0.0.1';
+	console.log( opts );
+	opts.host = new NetworkCidr( opts.host || '127.0.0.1' );
+	console.log( opts );
+
 	opts.port    = opts.port ?
 		Array.isArray( opts.port ) ? opts.port : [ opts.port ] :
 		[ ...commonPorts.keys() ];
