@@ -132,6 +132,14 @@ export function connect( host, port, opts = {} ) {
 				connectionRefused = false,
 				time              = process.hrtime();
 
+			// TODO:::
+			// ~~port~~
+			// ~~host~~
+			// localAddress
+			// localPort
+			// family
+			// hints
+			// lookup
 			const socket = createConnection( { port, host } );
 
 			socket.on( 'connect', () => {
@@ -277,41 +285,4 @@ export default class PortScanner extends EventEmitter
 		await Promise.all( data );
 		this.emit( 'done', this.result );
 	}
-
-	progress() {}
-}
-
-export async function scan( opts = {} ) {
-	console.log( opts );
-	opts.host = new NetworkCidr( opts.host || '127.0.0.1' );
-	console.log( opts );
-
-	opts.ports   = opts.ports ?
-		Array.isArray( opts.ports ) ? opts.ports : [ opts.ports ] :
-		[ ...commonPorts.keys() ];
-	opts.timeout = opts.timeout || 500;
-
-	opts.debug             = opts.hasOwnProperty( 'debug' ) ? opts.debug : false;
-	opts.onlyReportOpen    = opts.hasOwnProperty( 'onlyReportOpen' ) ? opts.onlyReportOpen : true;
-	opts.bannerGrab        = opts.hasOwnProperty( 'bannerGrab' ) ? opts.bannerGrab : true;
-	opts.attemptToIdentify = opts.hasOwnProperty( 'attemptToIdentify' ) ? opts.attemptToIdentify : true;
-
-	!opts.debug || console.log( 'starting scan with options' );
-	!opts.debug || console.log( `  host: ${ opts.host }` );
-	!opts.debug || console.log( `  ports: ${ opts.ports }` );
-	!opts.debug || console.log( `  timeout: ${ opts.timeout }` );
-	!opts.debug || console.log( `  debug: ${ opts.debug }` );
-	!opts.debug || console.log( `  onlyReportOpen: ${ opts.onlyReportOpen }` );
-	!opts.debug || console.log( `  bannerGrab: ${ opts.bannerGrab }` );
-	!opts.debug || console.log( `  attemptToIdentify: ${ opts.attemptToIdentify }` );
-
-	let result = [];
-	for ( let i = 0; i < opts.ports.length; i++ ) {
-		result.push( connect( opts.host, opts.ports[ i ], opts ) );
-	}
-
-	result = await Promise.all( result );
-	result = result.filter( ( i ) => !!i );
-
-	return result;
 }
