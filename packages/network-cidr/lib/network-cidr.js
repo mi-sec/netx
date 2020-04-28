@@ -50,20 +50,15 @@ class NetworkCidr
 		}
 
 		this.size     = Math.pow( 2, 32 - this.bitmask );
-		this.hosts    = this.size >= 2 ? this.size - 2 : 1;
 		this.base     = NetworkCidr.longToIp( this.netLong );
 		this.mask     = NetworkCidr.longToIp( this.maskLong );
 		this.hostmask = NetworkCidr.longToIp( ~this.maskLong );
 
-		this.first = this.bitmask <= 30 ?
-			NetworkCidr.longToIp( this.netLong + 1 ) :
-			this.base;
-
-		this.last = this.bitmask <= 30 ?
-			NetworkCidr.longToIp( this.netLong + this.size - 2 ) :
-			NetworkCidr.longToIp( this.netLong + this.size - 1 );
-
-		this.broadcast = NetworkCidr.longToIp( this.netLong + this.size - 1 );
+		this.firstd    = this.netLong;
+		this.first     = NetworkCidr.longToIp( this.firstd );
+		this.lastd     = this.firstd + this.size - 1;
+		this.last      = NetworkCidr.longToIp( this.lastd );
+		this.broadcast = this.last;
 	}
 
 	contains( ip )
@@ -86,6 +81,12 @@ class NetworkCidr
 		for ( ; long <= NetworkCidr.ipToLong( this.last ); long++, i++ ) {
 			fn( NetworkCidr.longToIp( long ), i, this );
 		}
+	}
+
+	static validIPv4( ip )
+	{
+		return /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
+			.test( ip );
 	}
 
 	static longToIp( long )
@@ -132,21 +133,49 @@ class NetworkCidr
 		return { ...this };
 	}
 
-	[ Symbol.iterator ]()
+	hosts()
 	{
-		const
-			long     = this.netLong,
-			lastLong = NetworkCidr.ipToLong( this.last );
+		if ( this.firstd === this.lastd ) {
+			const value = NetworkCidr.longToIp( this.firstd );
+
+			return {
+				[ Symbol.iterator ]() {
+					return {
+						_done: true,
+						next() {
+							return this._done ? {
+								value,
+								done: ( this._done = false )
+							} : { done: true };
+						}
+					};
+				}
+			};
+		}
+
+		const iteration = this[ Symbol.iterator ]( this.firstd + 1, this.lastd );
 
 		return {
-			index: long,
-			value: NetworkCidr.longToIp( long ),
+			[ Symbol.iterator ]() {
+				return iteration;
+			}
+		};
+	}
+
+	[ Symbol.iterator ]( first, last )
+	{
+		first = first || this.netLong;
+		last  = last || NetworkCidr.ipToLong( this.last ) + 1;
+
+		return {
+			index: first,
+			value: NetworkCidr.longToIp( first ),
 			get done() {
-				return !( this.index <= lastLong );
+				return !( this.index <= last );
 			},
 			next() {
-				this.index++;
 				this.value = NetworkCidr.longToIp( this.index );
+				this.index++;
 				return this;
 			}
 		};
@@ -158,7 +187,7 @@ class NetworkCidr
 			return this.toString();
 		}
 		else if ( n === 'number' ) {
-			return +this.hosts;
+			return +this.size;
 		}
 		else if ( n === 'boolean' ) {
 			return !!this;

@@ -6,6 +6,7 @@
 'use strict';
 
 import { createConnection } from 'net';
+import { EventEmitter }     from 'events';
 import LightMap             from '@mi-sec/lightmap';
 import NetworkCidr          from '@mi-sec/network-cidr';
 
@@ -208,13 +209,85 @@ export function connect( host, port, opts = {} ) {
 	);
 }
 
+export default class PortScanner extends EventEmitter
+{
+	constructor( opts = {} )
+	{
+		super();
+
+		this.opts = opts;
+
+		this.opts.cidr  = new NetworkCidr( this.opts.host || '127.0.0.1' );
+		this.opts.ports = this.opts.ports ?
+			Array.isArray( this.opts.ports ) ? this.opts.ports : [ this.opts.ports ] :
+			[ ...commonPorts.keys() ];
+
+		this.opts.timeout = this.opts.timeout || 500;
+
+		this.opts.debug           = this.opts.hasOwnProperty( 'debug' ) ? this.opts.debug : false;
+		this.opts.onlyReportOpen  = this.opts.hasOwnProperty( 'onlyReportOpen' ) ? this.opts.onlyReportOpen : true;
+		this.opts.bannerGrab      = this.opts.hasOwnProperty( 'bannerGrab' ) ? this.opts.bannerGrab : true;
+		this.opts.identifyService = this.opts.hasOwnProperty( 'identifyService' ) ? this.opts.identifyService : true;
+
+		!this.opts.debug || console.log( 'starting scan with options' );
+		!this.opts.debug || console.log( `  host: ${ this.opts.host }` );
+		!this.opts.debug || console.log( `  cidr: ${ this.opts.cidr }` );
+		!this.opts.debug || console.log( `  ports: ${ this.opts.ports }` );
+		!this.opts.debug || console.log( `  timeout: ${ this.opts.timeout }` );
+		!this.opts.debug || console.log( `  debug: ${ this.opts.debug }` );
+		!this.opts.debug || console.log( `  onlyReportOpen: ${ this.opts.onlyReportOpen }` );
+		!this.opts.debug || console.log( `  bannerGrab: ${ this.opts.bannerGrab }` );
+		!this.opts.debug || console.log( `  attemptToIdentify: ${ this.opts.attemptToIdentify }` );
+
+		this.result = new LightMap();
+
+		setImmediate( () => this.emit( 'ready', this.opts ) );
+	}
+
+	async scan()
+	{
+		const data = [];
+
+		let
+			progress = 0,
+			total    = 0;
+
+		for ( const host of this.opts.cidr.hosts() ) {
+			total += this.opts.ports.length;
+
+			for ( let i = 0; i < this.opts.ports.length; i++ ) {
+				const
+					port = this.opts.ports[ i ],
+					req  = connect( host, port, this.opts )
+						.then( ( d ) => {
+							this.result.set( `${ host }:${ port }`, d );
+
+							if ( d ) {
+								this.emit( 'data', d );
+							}
+						} )
+						.finally( () => {
+							this.emit( 'progress', ++progress / total );
+						} );
+
+				data.push( req );
+			}
+		}
+
+		await Promise.all( data );
+		this.emit( 'done', this.result );
+	}
+
+	progress() {}
+}
+
 export async function scan( opts = {} ) {
 	console.log( opts );
 	opts.host = new NetworkCidr( opts.host || '127.0.0.1' );
 	console.log( opts );
 
-	opts.port    = opts.port ?
-		Array.isArray( opts.port ) ? opts.port : [ opts.port ] :
+	opts.ports   = opts.ports ?
+		Array.isArray( opts.ports ) ? opts.ports : [ opts.ports ] :
 		[ ...commonPorts.keys() ];
 	opts.timeout = opts.timeout || 500;
 
@@ -225,7 +298,7 @@ export async function scan( opts = {} ) {
 
 	!opts.debug || console.log( 'starting scan with options' );
 	!opts.debug || console.log( `  host: ${ opts.host }` );
-	!opts.debug || console.log( `  ports: ${ opts.port }` );
+	!opts.debug || console.log( `  ports: ${ opts.ports }` );
 	!opts.debug || console.log( `  timeout: ${ opts.timeout }` );
 	!opts.debug || console.log( `  debug: ${ opts.debug }` );
 	!opts.debug || console.log( `  onlyReportOpen: ${ opts.onlyReportOpen }` );
@@ -233,8 +306,8 @@ export async function scan( opts = {} ) {
 	!opts.debug || console.log( `  attemptToIdentify: ${ opts.attemptToIdentify }` );
 
 	let result = [];
-	for ( let i = 0; i < opts.port.length; i++ ) {
-		result.push( connect( opts.host, opts.port[ i ], opts ) );
+	for ( let i = 0; i < opts.ports.length; i++ ) {
+		result.push( connect( opts.host, opts.ports[ i ], opts ) );
 	}
 
 	result = await Promise.all( result );
@@ -242,5 +315,3 @@ export async function scan( opts = {} ) {
 
 	return result;
 }
-
-export default scan;

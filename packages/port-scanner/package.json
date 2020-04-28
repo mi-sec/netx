@@ -15,7 +15,8 @@
 		"build": "webpack --config webpack.config.cjs",
 		"lint": "eslint .",
 		"postbuild": "echo '{\n    \"type\": \"commonjs\"\n}' > ./cjs/package.json",
-		"test": "mocha"
+		"test": "mocha",
+		"testing": "NODE_ENV=TESTING mocha"
 	},
 	"directories": {
 		"lib": "lib",
@@ -41,7 +42,7 @@
 	},
 	"dependencies": {
 		"@mi-sec/lightmap": "0.1.6",
-		"@mi-sec/network-cidr": "latest"
+		"@mi-sec/network-cidr": "file:../network-cidr"
 	},
 	"devDependencies": {
 		"chai": "4.2.0",
