@@ -6,7 +6,9 @@
 'use strict';
 
 import { createConnection } from 'net';
+import { EventEmitter }     from 'events';
 import LightMap             from '@mi-sec/lightmap';
+import NetworkCidr          from '@mi-sec/network-cidr';
 
 export const commonPorts = new LightMap( [
 	[ 7, 'echo' ],
@@ -115,22 +117,57 @@ export function convertHighResolutionTime( t ) {
 	return ( ( t[ 0 ] * 1e9 ) + t[ 1 ] ) / 1e6;
 }
 
+/**
+ * connect
+ * @description
+ * make a socket connection to a single host/port
+ * @param {string} host - ip address
+ * @param {number} port - port to connect to
+ * @param {object} opts - socket options
+ * @param {number} [opts.timeout=1000] - socket timeout
+ * @param {object} [opts.connectionOpts={}] - connection options
+ *     [ref](https://nodejs.org/api/net.html#net_socket_connect_options_connectlistener)
+ *
+ * @return {Promise<object|null>}
+ * information about connection, null if the host is not open
+ * @example
+ * await connect( '192.168.1.30', 22, {} );
+ *
+ * {
+ * 	host: '192.168.1.30',
+ * 	port: 22,
+ * 	status: 'open',
+ * 	banner: 'SSH-2.0-OpenSSH_7.9\r\n',
+ * 	time: 23.081522,
+ * 	service: 'ssh'
+ * }
+ */
 export function connect( host, port, opts = {} ) {
 	!opts.debug || console.log( `scanning ${ host }:${ port }` );
 
 	return new Promise(
 		( res, rej ) => {
-			const
-				timeout = opts.timeout || 1000;
+			opts.timeout             = opts.timeout || 1000;
+			opts.connectionOpts      = opts.connectionOpts || {};
+			opts.connectionOpts.host = host;
+			opts.connectionOpts.port = port;
 
 			let
 				banner            = '',
-				status            = '',
+				status            = null,
 				error             = null,
 				connectionRefused = false,
 				time              = process.hrtime();
 
-			const socket = createConnection( { port, host } );
+			// TODO:::
+			// ~~port~~
+			// ~~host~~
+			// localAddress
+			// localPort
+			// family
+			// hints
+			// lookup
+			const socket = createConnection( opts.connectionOpts );
 
 			socket.on( 'connect', () => {
 				const end = process.hrtime( time );
@@ -146,22 +183,22 @@ export function connect( host, port, opts = {} ) {
 				if ( opts.bannerGrab ) {
 					banner = data.toString();
 				}
+
 				socket.end();
 			} );
 
-			socket.setTimeout( timeout );
+			socket.setTimeout( opts.timeout );
 			socket.on( 'timeout', () => {
 				!opts.debug || console.log( `${ host }:${ port } timeout` );
-
-				status = 'closed';
-				error  = new Error( 'timeout' );
-				socket.end();
+				socket.destroy();
 			} );
 
 			socket.on( 'error', ( e ) => {
 				!opts.debug || console.log( `${ host }:${ port } error` );
 
-				status = 'closed';
+				if ( !status ) {
+					status = 'closed';
+				}
 
 				if ( e.code !== 'ECONNREFUSED' ) {
 					error = e;
@@ -172,7 +209,7 @@ export function connect( host, port, opts = {} ) {
 			} );
 
 			socket.on( 'close', ( e ) => {
-				if ( opts.onlyReportOpen && status !== 'open' ) {
+				if ( !status && opts.onlyReportOpen ) {
 					return res();
 				}
 
@@ -207,36 +244,72 @@ export function connect( host, port, opts = {} ) {
 	);
 }
 
-export async function scan( opts = {} ) {
-	opts.host    = opts.host || '127.0.0.1';
-	opts.port    = opts.port ?
-		Array.isArray( opts.port ) ? opts.port : [ opts.port ] :
-		[ ...commonPorts.keys() ];
-	opts.timeout = opts.timeout || 500;
+export default class PortScanner extends EventEmitter
+{
+	constructor( opts = {} )
+	{
+		super();
 
-	opts.debug             = opts.hasOwnProperty( 'debug' ) ? opts.debug : false;
-	opts.onlyReportOpen    = opts.hasOwnProperty( 'onlyReportOpen' ) ? opts.onlyReportOpen : true;
-	opts.bannerGrab        = opts.hasOwnProperty( 'bannerGrab' ) ? opts.bannerGrab : true;
-	opts.attemptToIdentify = opts.hasOwnProperty( 'attemptToIdentify' ) ? opts.attemptToIdentify : true;
+		this.opts = opts;
 
-	!opts.debug || console.log( 'starting scan with options' );
-	!opts.debug || console.log( `  host: ${ opts.host }` );
-	!opts.debug || console.log( `  ports: ${ opts.port }` );
-	!opts.debug || console.log( `  timeout: ${ opts.timeout }` );
-	!opts.debug || console.log( `  debug: ${ opts.debug }` );
-	!opts.debug || console.log( `  onlyReportOpen: ${ opts.onlyReportOpen }` );
-	!opts.debug || console.log( `  bannerGrab: ${ opts.bannerGrab }` );
-	!opts.debug || console.log( `  attemptToIdentify: ${ opts.attemptToIdentify }` );
+		this.opts.cidr  = new NetworkCidr( this.opts.host || '127.0.0.1' );
+		this.opts.ports = this.opts.ports ?
+			Array.isArray( this.opts.ports ) ? this.opts.ports : [ this.opts.ports ] :
+			[ ...commonPorts.keys() ];
 
-	let result = [];
-	for ( let i = 0; i < opts.port.length; i++ ) {
-		result.push( connect( opts.host, opts.port[ i ], opts ) );
+		this.opts.timeout = this.opts.timeout || 500;
+
+		this.opts.debug           = this.opts.hasOwnProperty( 'debug' ) ? this.opts.debug : false;
+		this.opts.onlyReportOpen  = this.opts.hasOwnProperty( 'onlyReportOpen' ) ? this.opts.onlyReportOpen : true;
+		this.opts.bannerGrab      = this.opts.hasOwnProperty( 'bannerGrab' ) ? this.opts.bannerGrab : true;
+		this.opts.identifyService = this.opts.hasOwnProperty( 'identifyService' ) ? this.opts.identifyService : true;
+
+		!this.opts.debug || console.log( 'starting scan with options' );
+		!this.opts.debug || console.log( `  host: ${ this.opts.host }` );
+		!this.opts.debug || console.log( `  cidr: ${ this.opts.cidr }` );
+		!this.opts.debug || console.log( `  ports: ${ this.opts.ports }` );
+		!this.opts.debug || console.log( `  timeout: ${ this.opts.timeout }` );
+		!this.opts.debug || console.log( `  debug: ${ this.opts.debug }` );
+		!this.opts.debug || console.log( `  onlyReportOpen: ${ this.opts.onlyReportOpen }` );
+		!this.opts.debug || console.log( `  bannerGrab: ${ this.opts.bannerGrab }` );
+		!this.opts.debug || console.log( `  attemptToIdentify: ${ this.opts.attemptToIdentify }` );
+
+		this.result = new LightMap();
+
+		setImmediate( () => this.emit( 'ready', this.opts ) );
 	}
 
-	result = await Promise.all( result );
-	result = result.filter( ( i ) => !!i );
+	async scan()
+	{
+		const data = [];
 
-	return result;
+		let
+			progress = 0,
+			total    = 0;
+
+		for ( const host of this.opts.cidr.hosts() ) {
+			total += this.opts.ports.length;
+
+			for ( let i = 0; i < this.opts.ports.length; i++ ) {
+				const
+					port = this.opts.ports[ i ],
+					req  = connect( host, port, this.opts )
+						.then( ( d ) => {
+							this.result.set( `${ host }:${ port }`, d );
+
+							if ( d ) {
+								this.emit( 'data', d );
+							}
+						} )
+						.finally( () => {
+							this.emit( 'progress', ++progress / total );
+						} );
+
+				data.push( req );
+			}
+		}
+
+		await Promise.all( data );
+		this.emit( 'done', this.result );
+	}
 }
-
-export default scan;
