@@ -12,7 +12,7 @@ const { expect } = chai;
 
 import PortScanner, { convertHighResolutionTime } from '../lib/port-scanner.js';
 
-describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version } localhost`, function() {
+describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version } localhost`, function () {
 	const
 		host   = '127.0.0.1/32',
 		banner = 'hello\r\n';
@@ -126,13 +126,15 @@ describe( [
 	'\tbecause it is impractical to run tests on specific network setups,',
 	'\tthese tests are skipped by default because they require services running on reserved ports',
 	'\tspecify `npm run testing` to execute the following tests'
-].join( '\n' ), function() {
+].join( '\n' ), function () {
 
-	before( function() {
+	before( function () {
 		if ( process.env.NODE_ENV !== 'TESTING' ) {
 			this.skip();
 		}
 	} );
+
+	this.timeout( 10000 );
 
 	const
 		host  = '127.0.0.1/32',
@@ -163,16 +165,19 @@ describe( [
 			.on( 'data', ( d ) => data.push( d ) )
 			.on( 'progress', ( d ) => progress = d )
 			.on( 'done', ( d ) => {
-				expect( progress ).to.be.a( 'number' ).and.eq( 1 );
+				expect( progress ).to.be.a( 'number' ).and.eq( 1 );y
 
 				expect( d.size ).to.eq( 4 );
 				expect( d.has( '127.0.0.1:80' ) ).to.eq( true );
-				expect( d.get( '127.0.0.1:80' ) ).to.eq( undefined );
+				expect( d.get( '127.0.0.1:80' ) ).to.deep.eq( {
+					host: '127.0.0.1',
+					port: 80,
+					status: 'closed'
+				} );
 
 				const
 					ssh = data.find( i => i ? i.port === 22 : false ),
-					vnc = data.find( i => i ? i.port === 5900 : false ),
-					aux = data.find( i => i ? i.port === 9000 : false );
+					vnc = data.find( i => i ? i.port === 5900 : false );
 
 				expect( ssh ).to.be.an( 'object' );
 				expect( ssh ).and.have.property( 'status' ).and.eq( 'open' );
@@ -183,11 +188,6 @@ describe( [
 				expect( vnc ).and.have.property( 'status' ).and.eq( 'open' );
 				expect( vnc ).and.have.property( 'banner' ).and.satisfy( ( msg ) => msg.startsWith( 'RFB' ) );
 				expect( vnc ).and.have.property( 'service' ).and.eq( 'vnc' );
-
-				expect( aux ).to.be.an( 'object' );
-				expect( aux ).and.have.property( 'status' ).and.eq( 'open' );
-				expect( aux ).and.have.property( 'banner' ).and.eq( '' );
-				expect( aux ).and.have.property( 'service' ).and.eq( 'unknown' );
 
 				done();
 			} );

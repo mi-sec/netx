@@ -48,6 +48,12 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 		expect( host.bitmask ).to.eq( 32 );
 	} );
 
+	it( 'should convert localhost to 0x7F000001', () => {
+		const localhost = new NetworkCidr( 'localhost' );
+		expect( localhost.netLong ).to.eq( 0x7F000001 );
+		expect( localhost.bitmask ).to.eq( 32 );
+	} );
+
 	describe( 'expected errors', () => {
 		it( 'should report invalid net parameter', () => {
 			expect( () => new NetworkCidr( 4278190080 ) ).to.throw( 'invalid "net" parameter' );

@@ -117,17 +117,44 @@ export function convertHighResolutionTime( t ) {
 	return ( ( t[ 0 ] * 1e9 ) + t[ 1 ] ) / 1e6;
 }
 
+/**
+ * connect
+ * @description
+ * make a socket connection to a single host/port
+ * @param {string} host - ip address
+ * @param {number} port - port to connect to
+ * @param {object} opts - socket options
+ * @param {number} [opts.timeout=1000] - socket timeout
+ * @param {object} [opts.connectionOpts={}] - connection options
+ *     [ref](https://nodejs.org/api/net.html#net_socket_connect_options_connectlistener)
+ *
+ * @return {Promise<object|null>}
+ * information about connection, null if the host is not open
+ * @example
+ * await connect( '192.168.1.30', 22, {} );
+ *
+ * {
+ * 	host: '192.168.1.30',
+ * 	port: 22,
+ * 	status: 'open',
+ * 	banner: 'SSH-2.0-OpenSSH_7.9\r\n',
+ * 	time: 23.081522,
+ * 	service: 'ssh'
+ * }
+ */
 export function connect( host, port, opts = {} ) {
 	!opts.debug || console.log( `scanning ${ host }:${ port }` );
 
 	return new Promise(
 		( res, rej ) => {
-			const
-				timeout = opts.timeout || 1000;
+			opts.timeout             = opts.timeout || 1000;
+			opts.connectionOpts      = opts.connectionOpts || {};
+			opts.connectionOpts.host = host;
+			opts.connectionOpts.port = port;
 
 			let
 				banner            = '',
-				status            = '',
+				status            = null,
 				error             = null,
 				connectionRefused = false,
 				time              = process.hrtime();
@@ -140,7 +167,7 @@ export function connect( host, port, opts = {} ) {
 			// family
 			// hints
 			// lookup
-			const socket = createConnection( { port, host } );
+			const socket = createConnection( opts.connectionOpts );
 
 			socket.on( 'connect', () => {
 				const end = process.hrtime( time );
@@ -156,22 +183,22 @@ export function connect( host, port, opts = {} ) {
 				if ( opts.bannerGrab ) {
 					banner = data.toString();
 				}
+
 				socket.end();
 			} );
 
-			socket.setTimeout( timeout );
+			socket.setTimeout( opts.timeout );
 			socket.on( 'timeout', () => {
 				!opts.debug || console.log( `${ host }:${ port } timeout` );
-
-				status = 'closed';
-				error  = new Error( 'timeout' );
-				socket.end();
+				socket.destroy();
 			} );
 
 			socket.on( 'error', ( e ) => {
 				!opts.debug || console.log( `${ host }:${ port } error` );
 
-				status = 'closed';
+				if ( !status ) {
+					status = 'closed';
+				}
 
 				if ( e.code !== 'ECONNREFUSED' ) {
 					error = e;
@@ -182,7 +209,7 @@ export function connect( host, port, opts = {} ) {
 			} );
 
 			socket.on( 'close', ( e ) => {
-				if ( opts.onlyReportOpen && status !== 'open' ) {
+				if ( !status && opts.onlyReportOpen ) {
 					return res();
 				}
 

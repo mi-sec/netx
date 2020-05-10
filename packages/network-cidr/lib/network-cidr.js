@@ -12,6 +12,10 @@ class NetworkCidr
 		if ( !net || typeof net !== 'string' ) {
 			throw new Error( 'invalid "net" parameter' );
 		}
+		else if ( /localhost/.test( net ) ) {
+			net  = '127.0.0.1';
+			mask = 32;
+		}
 		else if ( !mask ) {
 			const ref = net.split( '/', 2 );
 			net       = ref[ 0 ];
@@ -85,6 +89,10 @@ class NetworkCidr
 
 	static validIPv4( ip )
 	{
+		if ( ip === 'localhost' ) {
+			return true;
+		}
+
 		return /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
 			.test( ip );
 	}
@@ -101,6 +109,10 @@ class NetworkCidr
 
 	static ipToLong( ip )
 	{
+		if ( ip === 'localhost' ) {
+			return 0x7F000001;
+		}
+
 		const b = ( ip + '' ).split( '.' );
 
 		if ( b.length === 0 || b.length > 4 ) {
