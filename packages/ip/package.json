@@ -1,0 +1,51 @@
+{
+	"name": "@mi-sec/ip",
+	"version": "1.0.0",
+	"description": "IP Address utility",
+	"main": "./lib/ip.js",
+	"exports": {
+		".": {
+			"require": "./lib/ip.js",
+			"import": "./dist/ip.mjs"
+		},
+		"./": "./"
+	},
+	"scripts": {
+		"build": "gen-esm-wrapper ./lib/* ./dist/ip.mjs",
+		"lint": "eslint .",
+		"test": "nyc --reporter=json-summary mocha"
+	},
+	"directories": {
+		"lib": "lib",
+		"dist": "dist"
+	},
+	"files": [
+		"lib",
+		"dist"
+	],
+	"keywords": [
+		"netx",
+		"ip",
+		"mi-sec"
+	],
+	"author": "MI-SEC",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/mi-sec/netx.git"
+	},
+	"homepage": "https://github.com/mi-sec/netx#readme",
+	"bugs": {
+		"url": "https://github.com/mi-sec/netx/issues"
+	},
+	"devDependencies": {
+		"chai": "4.2.0",
+		"eslint": "7.0.0",
+		"gen-esm-wrapper": "1.0.6",
+		"mocha": "7.1.2",
+		"nyc": "15.0.1"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}
