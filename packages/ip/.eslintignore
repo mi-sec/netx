@@ -1,0 +1,9 @@
+docs*/**
+documentation*/**
+seed
+test
+build
+dist
+cjs
+storage
+node_modules
