@@ -15,16 +15,31 @@ port scanner utility
 ### Usage
 
 ```
-import scan from '@mi-sec/port-scanner';
+import PortScanner from '@mi-sec/port-scanner';
 
-await scan( {
-    host: '127.0.0.1',
-    port: [ 22 ],
-    timeout: 500,
-    onlyReportOpen: true,
-    bannerGrab: true,
-    attemptToIdentify: true
+const scan = new PortScanner( {
+	host: '192.168.1.0/24',
+	ports: [ 22 ],
+	timeout: 100,
+	attemptToIdentify: true
 } );
+
+const data   = [];
+let progress = 0;
+
+result
+	.on( 'ready', async () => {
+		await result.scan();
+	} )
+	.on( 'data', ( d ) => {
+		data.push( d );
+	} )
+	.on( 'progress', ( d ) => {
+		console.log( 'progress', d );
+	} )
+	.on( 'done', ( d ) => {
+		console.log( d );
+	} );
 ```
 
 Result:

@@ -12,7 +12,7 @@ const { expect } = chai;
 import NetworkCidr from '../lib/network-cidr.js';
 
 describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version }`, function() {
-	it( 'longToIp should convert long to ip string', () => {
+	it( 'NetworkCidr.longToIp should convert long to ip string', () => {
 		// FF.FF.FF.FF
 		expect( NetworkCidr.longToIp( 4294967295 ) )
 			.to.be.a( 'string' )
@@ -24,7 +24,7 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 			.to.equal( '192.168.1.1' );
 	} );
 
-	it( 'ipToLong should convert ip to long number', () => {
+	it( 'NetworkCidr.ipToLong should convert ip to long number', () => {
 		// FF.FF.FF.FF
 		expect( NetworkCidr.ipToLong( '255.255.255.255' ) )
 			.to.be.a( 'number' )
@@ -34,6 +34,24 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 		expect( NetworkCidr.ipToLong( '192.168.1.1' ) )
 			.to.be.a( 'number' )
 			.to.equal( 3232235777 );
+	} );
+
+	it( 'should create a NetworkCidr instance', () => {
+		const
+			net  = new NetworkCidr( '192.168.1.0' ),
+			host = new NetworkCidr( '192.168.1.1' );
+
+		expect( net.constructor.name ).to.eq( 'NetworkCidr' );
+		expect( net.bitmask ).to.eq( 24 );
+
+		expect( host.constructor.name ).to.eq( 'NetworkCidr' );
+		expect( host.bitmask ).to.eq( 32 );
+	} );
+
+	it( 'should convert localhost to 0x7F000001', () => {
+		const localhost = new NetworkCidr( 'localhost' );
+		expect( localhost.netLong ).to.eq( 0x7F000001 );
+		expect( localhost.bitmask ).to.eq( 32 );
 	} );
 
 	describe( 'expected errors', () => {
@@ -125,15 +143,25 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 			expect( cidr.contains( '192.168.1.250/255.255.0.0' ) ).to.eq( false );
 		} );
 
+		it( 'NetworkCidr.forEach (/32 network)', () => {
+			const cidr = new NetworkCidr( '192.168.1.1/32' );
+			const data = [];
+
+			cidr.forEach( ( ip, i, c ) => data.push( { ip, i, c } ) );
+
+			expect( data ).to.be.an( 'array' ).with.length( 1 );
+			expect( data[ 0 ] ).to.deep.eq( { ip: '192.168.1.1', i: 0, c: cidr } );
+		} );
+
 		it( 'NetworkCidr.forEach (/24 network)', () => {
 			const cidr = new NetworkCidr( '192.168.1.0/24' );
 			const data = [];
 
 			cidr.forEach( ( ip, i, c ) => data.push( { ip, i, c } ) );
 
-			expect( data ).to.be.an( 'array' ).with.length( 254 );
-			expect( data[ 0 ] ).to.deep.eq( { ip: '192.168.1.1', i: 0, c: cidr } );
-			expect( data[ 253 ] ).to.deep.eq( { ip: '192.168.1.254', i: 253, c: cidr } );
+			expect( data ).to.be.an( 'array' ).with.length( 256 );
+			expect( data[ 0 ] ).to.deep.eq( { ip: '192.168.1.0', i: 0, c: cidr } );
+			expect( data[ 255 ] ).to.deep.eq( { ip: '192.168.1.255', i: 255, c: cidr } );
 		} );
 
 		it( 'NetworkCidr.forEach (/20 network)', () => {
@@ -142,11 +170,36 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 
 			cidr.forEach( ( ip, i ) => data.push( { ip, i } ) );
 
-			expect( data ).to.be.an( 'array' ).with.length( 4094 );
-			expect( data[ 0 ] ).to.deep.eq( { ip: '192.168.0.1', i: 0 } );
-			expect( data[ 255 ] ).to.deep.eq( { ip: '192.168.1.0', i: 255 } );
-			expect( data[ 2047 ] ).to.deep.eq( { ip: '192.168.8.0', i: 2047 } );
-			expect( data[ 4093 ] ).to.deep.eq( { ip: '192.168.15.254', i: 4093 } );
+			expect( data ).to.be.an( 'array' ).with.length( 4096 );
+			expect( data[ 0 ] ).to.deep.eq( { ip: '192.168.0.0', i: 0 } );
+			expect( data[ 256 ] ).to.deep.eq( { ip: '192.168.1.0', i: 256 } );
+			expect( data[ 2048 ] ).to.deep.eq( { ip: '192.168.8.0', i: 2048 } );
+			expect( data[ 4094 ] ).to.deep.eq( { ip: '192.168.15.254', i: 4094 } );
+		} );
+
+		it( 'NetworkCidr[Symbol.iterator]() (/32 network)', () => {
+			const cidr = new NetworkCidr( '127.0.0.1/32' );
+			const data = [];
+
+			for ( const ip of cidr ) {
+				data.push( ip );
+			}
+
+			expect( data ).to.be.an( 'array' ).with.length( 1 );
+			expect( data[ 0 ] ).to.eq( '127.0.0.1' );
+		} );
+
+		it( 'NetworkCidr[Symbol.iterator]() (/30 network)', () => {
+			const cidr = new NetworkCidr( '192.168.1.0/30' );
+			const data = [];
+
+			for ( const ip of cidr ) {
+				data.push( ip );
+			}
+
+			expect( data ).to.be.an( 'array' ).with.length( 4 );
+			expect( data[ 0 ] ).to.eq( '192.168.1.0' );
+			expect( data[ 3 ] ).to.eq( '192.168.1.3' );
 		} );
 
 		it( 'NetworkCidr[Symbol.iterator]() (/24 network)', () => {
@@ -157,9 +210,9 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 				data.push( ip );
 			}
 
-			expect( data ).to.be.an( 'array' ).with.length( 254 );
-			expect( data[ 0 ] ).to.eq( '192.168.1.1' );
-			expect( data[ 253 ] ).to.eq( '192.168.1.254' );
+			expect( data ).to.be.an( 'array' ).with.length( 256 );
+			expect( data[ 0 ] ).to.eq( '192.168.1.0' );
+			expect( data[ 255 ] ).to.eq( '192.168.1.255' );
 		} );
 
 		it( 'NetworkCidr[Symbol.iterator]() (/20 network)', () => {
@@ -170,16 +223,67 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 				data.push( ip );
 			}
 
-			expect( data ).to.be.an( 'array' ).with.length( 4094 );
-			expect( data[ 0 ] ).to.eq( '192.168.0.1' );
-			expect( data[ 4093 ] ).to.eq( '192.168.15.254' );
+			expect( data ).to.be.an( 'array' ).with.length( 4096 );
+			expect( data[ 0 ] ).to.eq( '192.168.0.0' );
+			expect( data[ 4095 ] ).to.eq( '192.168.15.255' );
+		} );
+
+		it( 'NetworkCidr.hosts() (/32 network)', () => {
+			const cidr = new NetworkCidr( '127.0.0.1/32' );
+			const data = [];
+
+			for ( const ip of cidr.hosts() ) {
+				data.push( ip );
+			}
+
+			expect( data ).to.be.an( 'array' ).with.length( 1 );
+			expect( data[ 0 ] ).to.eq( '127.0.0.1' );
+		} );
+
+		it( 'NetworkCidr.hosts() (/30 network)', () => {
+			const cidr = new NetworkCidr( '192.168.1.0/30' );
+			const data = [];
+
+			for ( const ip of cidr.hosts() ) {
+				data.push( ip );
+			}
+
+			expect( data ).to.be.an( 'array' ).with.length( 2 );
+			expect( data[ 0 ] ).to.eq( '192.168.1.1' );
+			expect( data[ 1 ] ).to.eq( '192.168.1.2' );
+		} );
+
+		it( 'NetworkCidr.hosts() (/24 network)', () => {
+			const cidr = new NetworkCidr( '192.168.1.0/24' );
+			const data = [];
+
+			for ( const ip of cidr ) {
+				data.push( ip );
+			}
+
+			expect( data ).to.be.an( 'array' ).with.length( 256 );
+			expect( data[ 0 ] ).to.eq( '192.168.1.0' );
+			expect( data[ 255 ] ).to.eq( '192.168.1.255' );
+		} );
+
+		it( 'NetworkCidr.hosts() (/20 network)', () => {
+			const cidr = new NetworkCidr( '192.168.1.0/20' );
+			const data = [];
+
+			for ( const ip of cidr ) {
+				data.push( ip );
+			}
+
+			expect( data ).to.be.an( 'array' ).with.length( 4096 );
+			expect( data[ 0 ] ).to.eq( '192.168.0.0' );
+			expect( data[ 4095 ] ).to.eq( '192.168.15.255' );
 		} );
 
 		it( 'NetworkCidr[Symbol.toPrimitive]()', () => {
 			const cidr24 = new NetworkCidr( '192.168.1.0/24' );
-			expect( +cidr24 ).to.be.a( 'number' ).and.eq( 254 );
+			expect( +cidr24 ).to.be.a( 'number' ).and.eq( 256 );
 			const cidr20 = new NetworkCidr( '192.168.1.0/20' );
-			expect( +cidr20 ).to.be.a( 'number' ).and.eq( 4094 );
+			expect( +cidr20 ).to.be.a( 'number' ).and.eq( 4096 );
 		} );
 	} );
 
@@ -191,12 +295,11 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 			expect( cidr.maskLong ).to.be.a( 'number' ).and.eq( 4278190080 );
 			expect( cidr.netLong ).to.be.a( 'number' ).and.eq( 167772160 );
 			expect( cidr.size ).to.be.a( 'number' ).and.eq( 16777216 );
-			expect( cidr.hosts ).to.be.a( 'number' ).and.eq( 16777214 );
 			expect( cidr.base ).to.be.a( 'string' ).and.eq( '10.0.0.0' );
 			expect( cidr.mask ).to.be.a( 'string' ).and.eq( '255.0.0.0' );
 			expect( cidr.hostmask ).to.be.a( 'string' ).and.eq( '0.255.255.255' );
-			expect( cidr.first ).to.be.a( 'string' ).and.eq( '10.0.0.1' );
-			expect( cidr.last ).to.be.a( 'string' ).and.eq( '10.255.255.254' );
+			expect( cidr.first ).to.be.a( 'string' ).and.eq( '10.0.0.0' );
+			expect( cidr.last ).to.be.a( 'string' ).and.eq( '10.255.255.255' );
 			expect( cidr.broadcast ).to.be.a( 'string' ).and.eq( '10.255.255.255' );
 		} );
 	} );
@@ -209,12 +312,11 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 			expect( cidr.maskLong ).to.be.a( 'number' ).and.eq( 4293918720 );
 			expect( cidr.netLong ).to.be.a( 'number' ).and.eq( 2886729728 );
 			expect( cidr.size ).to.be.a( 'number' ).and.eq( 1048576 );
-			expect( cidr.hosts ).to.be.a( 'number' ).and.eq( 1048574 );
 			expect( cidr.base ).to.be.a( 'string' ).and.eq( '172.16.0.0' );
 			expect( cidr.mask ).to.be.a( 'string' ).and.eq( '255.240.0.0' );
 			expect( cidr.hostmask ).to.be.a( 'string' ).and.eq( '0.15.255.255' );
-			expect( cidr.first ).to.be.a( 'string' ).and.eq( '172.16.0.1' );
-			expect( cidr.last ).to.be.a( 'string' ).and.eq( '172.31.255.254' );
+			expect( cidr.first ).to.be.a( 'string' ).and.eq( '172.16.0.0' );
+			expect( cidr.last ).to.be.a( 'string' ).and.eq( '172.31.255.255' );
 			expect( cidr.broadcast ).to.be.a( 'string' ).and.eq( '172.31.255.255' );
 		} );
 	} );
@@ -227,12 +329,11 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 			expect( cidr.maskLong ).to.be.a( 'number' ).and.eq( 4294901760 );
 			expect( cidr.netLong ).to.be.a( 'number' ).and.eq( 3232235520 );
 			expect( cidr.size ).to.be.a( 'number' ).and.eq( 65536 );
-			expect( cidr.hosts ).to.be.a( 'number' ).and.eq( 65534 );
 			expect( cidr.base ).to.be.a( 'string' ).and.eq( '192.168.0.0' );
 			expect( cidr.mask ).to.be.a( 'string' ).and.eq( '255.255.0.0' );
 			expect( cidr.hostmask ).to.be.a( 'string' ).and.eq( '0.0.255.255' );
-			expect( cidr.first ).to.be.a( 'string' ).and.eq( '192.168.0.1' );
-			expect( cidr.last ).to.be.a( 'string' ).and.eq( '192.168.255.254' );
+			expect( cidr.first ).to.be.a( 'string' ).and.eq( '192.168.0.0' );
+			expect( cidr.last ).to.be.a( 'string' ).and.eq( '192.168.255.255' );
 			expect( cidr.broadcast ).to.be.a( 'string' ).and.eq( '192.168.255.255' );
 		} );
 	} );
