@@ -6,6 +6,7 @@ on:
       - '*.*'
     paths:
       - 'packages/ip/**'
+
   pull_request:
     tags-ignore:
       - '*.*'
@@ -28,8 +29,49 @@ jobs:
         with:
           node-version: 12.x
 
-      - name: Install npm dependencies
-        run: npm i
+      - name: Install dependencies
+        run: yarn --cwd packages/ip/ install
 
       - name: Lint
-        run: npm run lint
+        run: yarn --cwd packages/ip/ lint
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v1
+
+      - name: "Set Node.js 12.x"
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+
+      - name: Install npm dependencies
+        run: yarn --cwd packages/ip/ install
+
+      - name: Run tests
+        run: yarn --cwd packages/ip/ test
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.ACCESS_TOKEN }}
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v1
+
+      - name: "Set Node.js 12.x"
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+
+      - name: Install npm dependencies
+        run: yarn --cwd packages/ip/ install
+
+      - name: Run tests
+        run: yarn --cwd packages/ip/ build

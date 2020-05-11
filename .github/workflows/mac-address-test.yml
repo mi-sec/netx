@@ -1,4 +1,4 @@
-name: mac-address unit test
+name: mac-address test and build
 
 on:
   push:
@@ -7,22 +7,71 @@ on:
     paths:
       - 'packages/mac-address/**'
 
+  pull_request:
+    tags-ignore:
+      - '*.*'
+    paths:
+      - 'packages/mac-address/**'
+
+env:
+  CI: true
+
 jobs:
-  test:
+  lint:
+    name: lint
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        # node-version: [ 8.x, 10.x, 12.x ]
-        node-version: [ 13.x ]
-
     steps:
-      - uses: actions/checkout@v1
-      - name: "Test: Use Node.js ${{ matrix.node-version }}"
+      - name: Clone repository
+        uses: actions/checkout@v1
+
+      - name: "Set Node.js 12.x"
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 12.x
+
       - name: Install dependencies
-        run: npm ci --silent --prefix packages/mac-address/
-      - name: test
-        run: npm run --prefix packages/mac-address/ test
+        run: yarn --cwd packages/mac-address/ install
+
+      - name: Lint
+        run: yarn --cwd packages/mac-address/ lint
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v1
+
+      - name: "Set Node.js 12.x"
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+
+      - name: Install dependencies
+        run: yarn --cwd packages/mac-address/ install
+
+      - name: Run tests
+        run: yarn --cwd packages/mac-address/ test
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.ACCESS_TOKEN }}
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v1
+
+      - name: "Set Node.js 12.x"
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+
+      - name: Install npm dependencies
+        run: yarn --cwd packages/mac-address/ install
+
+      - name: Run tests
+        run: yarn --cwd packages/mac-address/ build
