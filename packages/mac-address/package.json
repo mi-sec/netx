@@ -14,7 +14,7 @@
 		"build": "gen-esm-wrapper ./lib/* ./esm/ip.mjs",
 		"lint": "eslint .",
 		"test": "nyc --reporter=lcov --reporter=text-summary mocha",
-		"testing": "nyc mocha"
+		"testd": "nyc mocha"
 	},
 	"keywords": [
 		"netx",

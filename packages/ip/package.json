@@ -13,7 +13,8 @@
 	"scripts": {
 		"build": "gen-esm-wrapper ./lib/* ./esm/ip.mjs",
 		"lint": "eslint .",
-		"test": "nyc --reporter=lcov --reporter=text-summary mocha"
+		"test": "nyc --reporter=lcov --reporter=text-summary mocha",
+		"testd": "nyc mocha"
 	},
 	"keywords": [
 		"netx",
