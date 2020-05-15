@@ -5,37 +5,13 @@
  *******************************************************************************************************/
 'use strict';
 
-import chai from 'chai';
+const
+	chai       = require( 'chai' ),
+	{ expect } = chai;
 
-const { expect } = chai;
+const NetworkCidr = require( '../lib/network-cidr' );
 
-import NetworkCidr from '../lib/network-cidr.js';
-
-describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version }`, function() {
-	it( 'NetworkCidr.longToIp should convert long to ip string', () => {
-		// FF.FF.FF.FF
-		expect( NetworkCidr.longToIp( 4294967295 ) )
-			.to.be.a( 'string' )
-			.to.equal( '255.255.255.255' );
-
-		// C0.A8.01.01
-		expect( NetworkCidr.longToIp( 3232235777 ) )
-			.to.be.a( 'string' )
-			.to.equal( '192.168.1.1' );
-	} );
-
-	it( 'NetworkCidr.ipToLong should convert ip to long number', () => {
-		// FF.FF.FF.FF
-		expect( NetworkCidr.ipToLong( '255.255.255.255' ) )
-			.to.be.a( 'number' )
-			.to.equal( 4294967295 );
-
-		// C0.A8.01.01
-		expect( NetworkCidr.ipToLong( '192.168.1.1' ) )
-			.to.be.a( 'number' )
-			.to.equal( 3232235777 );
-	} );
-
+describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version }`, function () {
 	it( 'should create a NetworkCidr instance', () => {
 		const
 			net  = new NetworkCidr( '192.168.1.0' ),
@@ -55,6 +31,10 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 	} );
 
 	describe( 'expected errors', () => {
+		it( 'missing net parameter', () => {
+			expect( () => new NetworkCidr() ).to.throw( 'invalid "net" parameter' );
+		} );
+
 		it( 'should report invalid net parameter', () => {
 			expect( () => new NetworkCidr( 4278190080 ) ).to.throw( 'invalid "net" parameter' );
 		} );
@@ -279,11 +259,40 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 			expect( data[ 4095 ] ).to.eq( '192.168.15.255' );
 		} );
 
+		it( 'NetworkCidr.toJSON', () => {
+			const cidr24 = new NetworkCidr( '192.168.1.0/24' );
+			expect( JSON.stringify( cidr24 ) )
+				.to.eq( JSON.stringify( {
+				bitmask: 24,
+				maskLong: 4294967040,
+				netLong: 3232235776,
+				size: 256,
+				base: '192.168.1.0',
+				mask: '255.255.255.0',
+				hostmask: '0.0.0.255',
+				firstd: 3232235776,
+				first: '192.168.1.0',
+				lastd: 3232236031,
+				last: '192.168.1.255',
+				broadcast: '192.168.1.255'
+			} ) );
+		} );
+
 		it( 'NetworkCidr[Symbol.toPrimitive]()', () => {
 			const cidr24 = new NetworkCidr( '192.168.1.0/24' );
-			expect( +cidr24 ).to.be.a( 'number' ).and.eq( 256 );
 			const cidr20 = new NetworkCidr( '192.168.1.0/20' );
+
+			expect( +cidr24 ).to.be.a( 'number' ).and.eq( 256 );
 			expect( +cidr20 ).to.be.a( 'number' ).and.eq( 4096 );
+
+			expect( '' + cidr24 ).to.be.a( 'string' ).and.eq( '192.168.1.0/24' );
+			expect( '' + cidr20 ).to.be.a( 'string' ).and.eq( '192.168.0.0/20' );
+		} );
+
+		it( 'NetworkCidr[Symbol.toStringTag]()', () => {
+			expect( Object.prototype.toString.call( new NetworkCidr( '192.168.1.0/24' ) ) )
+				.to.be.a( 'string' )
+				.and.eq( '[object NetworkCidr]' );
 		} );
 	} );
 

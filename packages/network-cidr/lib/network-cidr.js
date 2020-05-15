@@ -5,7 +5,7 @@
  *******************************************************************************************************/
 'use strict';
 
-const ip = require( '@mi-sec/ip' );
+const { ipToLong, longToIp } = require( '@mi-sec/ip' );
 
 class NetworkCidr
 {
@@ -19,21 +19,11 @@ class NetworkCidr
 			mask = 32;
 		}
 		else if ( !mask ) {
-			const ref = net.split( '/', 2 );
-			net       = ref[ 0 ];
-			mask      = ref[ 1 ];
-
-			if ( !mask ) {
-				mask = net.split( '.' ).filter( ( i ) => !!+i ).length * 8;
-
-				if ( !mask || mask > 32 ) {
-					throw new Error( `invalid network address: ${ net }` );
-				}
-			}
+			[ net, mask ] = this.maskFromNetwork( net );
 		}
 
 		if ( typeof mask === 'string' && mask.indexOf( '.' ) > -1 ) {
-			this.maskLong = NetworkCidr.ipToLong( mask );
+			this.maskLong = ipToLong( mask );
 
 			for ( let i = 32; i >= 0; i-- ) {
 				if ( this.maskLong === ( 0xFFFFFFFF << ( 32 - i ) ) >>> 0 ) {
@@ -42,29 +32,51 @@ class NetworkCidr
 				}
 			}
 		}
-		else if ( mask ) {
+		else {
 			this.bitmask = parseInt( mask, 10 );
 			if ( this.bitmask > 0 ) {
 				this.maskLong = ( 0xFFFFFFFF << ( 32 - this.bitmask ) ) >>> 0;
 			}
 		}
 
-		this.netLong = ( NetworkCidr.ipToLong( net ) & this.maskLong ) >>> 0;
+		this.netLong = ( ipToLong( net ) & this.maskLong ) >>> 0;
 
-		if ( !( this.bitmask >= 1 && this.bitmask <= 32 ) ) {
-			throw new Error( `invalid mask: ${ mask }` );
-		}
+		this.validBitmask( this.bitmask, mask );
 
 		this.size     = Math.pow( 2, 32 - this.bitmask );
-		this.base     = NetworkCidr.longToIp( this.netLong );
-		this.mask     = NetworkCidr.longToIp( this.maskLong );
-		this.hostmask = NetworkCidr.longToIp( ~this.maskLong );
+		this.base     = longToIp( this.netLong );
+		this.mask     = longToIp( this.maskLong );
+		this.hostmask = longToIp( ~this.maskLong );
 
 		this.firstd    = this.netLong;
-		this.first     = NetworkCidr.longToIp( this.firstd );
+		this.first     = longToIp( this.firstd );
 		this.lastd     = this.firstd + this.size - 1;
-		this.last      = NetworkCidr.longToIp( this.lastd );
+		this.last      = longToIp( this.lastd );
 		this.broadcast = this.last;
+	}
+
+	validBitmask( n, mask = n )
+	{
+		if ( !( n >= 1 && n <= 32 ) ) {
+			throw new Error( `invalid mask: ${ mask }` );
+		}
+	}
+
+	maskFromNetwork( net )
+	{
+		const ref = net.split( '/', 2 );
+		let mask  = ref[ 1 ];
+		net       = ref[ 0 ];
+
+		if ( !mask ) {
+			mask = net.split( '.' ).filter( ( i ) => !!+i ).length * 8;
+
+			if ( !mask || mask > 32 ) {
+				throw new Error( `invalid network address: ${ net }` );
+			}
+		}
+
+		return [ net, mask ];
 	}
 
 	contains( ip )
@@ -77,64 +89,16 @@ class NetworkCidr
 			return this.contains( ip.base ) && this.contains( ip.broadcast || ip.last );
 		}
 		else {
-			return ( NetworkCidr.ipToLong( ip ) & this.maskLong ) >>> 0 === ( this.netLong & this.maskLong ) >>> 0;
+			return ( ipToLong( ip ) & this.maskLong ) >>> 0 === ( this.netLong & this.maskLong ) >>> 0;
 		}
 	}
 
 	forEach( fn )
 	{
-		let long = NetworkCidr.ipToLong( this.first ), i = 0;
-		for ( ; long <= NetworkCidr.ipToLong( this.last ); long++, i++ ) {
-			fn( NetworkCidr.longToIp( long ), i, this );
+		let long = ipToLong( this.first ), i = 0;
+		for ( ; long <= ipToLong( this.last ); long++, i++ ) {
+			fn( longToIp( long ), i, this );
 		}
-	}
-
-	static validIPv4( ip )
-	{
-		if ( ip === 'localhost' ) {
-			return true;
-		}
-
-		return /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
-			.test( ip );
-	}
-
-	static longToIp( long )
-	{
-		return [
-			( long & ( 0xFF << 24 ) ) >>> 24,
-			( long & ( 0xFF << 16 ) ) >>> 16,
-			( long & ( 0xFF << 8 ) ) >>> 8,
-			long & 0xFF
-		].join( '.' );
-	}
-
-	static ipToLong( ip )
-	{
-		if ( ip === 'localhost' ) {
-			return 0x7F000001;
-		}
-
-		const b = ( ip + '' ).split( '.' );
-
-		if ( b.length === 0 || b.length > 4 ) {
-			throw new Error( 'invalid ip' );
-		}
-
-		for ( let i = 0; i < b.length; i++ ) {
-			const byte = +b[ i ];
-
-			if ( byte !== byte || byte < 0 || byte > 255 ) {
-				throw new Error( `invalid byte: ${ byte }` );
-			}
-		}
-
-		return (
-			( b[ 0 ] || 0 ) << 24 |
-			( b[ 1 ] || 0 ) << 16 |
-			( b[ 2 ] || 0 ) << 8 |
-			( b[ 3 ] || 0 )
-		) >>> 0;
 	}
 
 	toString()
@@ -150,7 +114,7 @@ class NetworkCidr
 	hosts()
 	{
 		if ( this.firstd === this.lastd ) {
-			const value = NetworkCidr.longToIp( this.firstd );
+			const value = longToIp( this.firstd );
 
 			return {
 				[ Symbol.iterator ]() {
@@ -179,16 +143,16 @@ class NetworkCidr
 	[ Symbol.iterator ]( first, last )
 	{
 		first = first || this.netLong;
-		last  = last || NetworkCidr.ipToLong( this.last ) + 1;
+		last  = last || ipToLong( this.last ) + 1;
 
 		return {
 			index: first,
-			value: NetworkCidr.longToIp( first ),
+			value: longToIp( first ),
 			get done() {
 				return !( this.index <= last );
 			},
 			next() {
-				this.value = NetworkCidr.longToIp( this.index );
+				this.value = longToIp( this.index );
 				this.index++;
 				return this;
 			}
@@ -197,14 +161,8 @@ class NetworkCidr
 
 	[ Symbol.toPrimitive ]( n )
 	{
-		if ( n === 'string' ) {
-			return this.toString();
-		}
-		else if ( n === 'number' ) {
+		if ( n === 'number' ) {
 			return +this.size;
-		}
-		else if ( n === 'boolean' ) {
-			return !!this;
 		}
 		else {
 			return this.toString();
@@ -222,4 +180,4 @@ class NetworkCidr
 	}
 }
 
-export default NetworkCidr;
+module.exports = NetworkCidr;

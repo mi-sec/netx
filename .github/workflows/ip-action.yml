@@ -41,9 +41,11 @@ jobs:
       - name: install npm dependencies
         run: npm ci --silent --prefix packages/ip/
       - name: run tests
-        run: npm run --prefix packages/ip/ test
+        run: |
+          npm run --prefix packages/ip/ test
+          cat packages/ip/coverage/lcov.info
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
-          path-to-lcov: ${{ github.workspace }}/packages/ip/coverage/lcov.info
+          path-to-lcov: packages/ip/coverage/lcov.info
           github-token: ${{ secrets.ACCESS_TOKEN }}
