@@ -6,7 +6,6 @@ on:
       - '*.*'
     paths:
       - 'packages/ip/**'
-
   pull_request:
     tags-ignore:
       - '*.*'
@@ -18,7 +17,6 @@ env:
 
 jobs:
   lint:
-    name: lint
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
@@ -33,15 +31,17 @@ jobs:
         run: yarn --cwd packages/ip/ lint
 
 #  test:
-#    name: test
 #    runs-on: ubuntu-latest
+#    strategy:
+#      matrix:
+#        node-version: [12.x, 14.x]
 #    steps:
 #      - name: Clone repository
 #        uses: actions/checkout@v1
-#      - name: 'Set Node.js 12.x'
+#      - name: 'Set Node.js ${{ matrix.node }}'
 #        uses: actions/setup-node@v1
 #        with:
-#          node-version: 12.x
+#          node-version: ${{ matrix.node }}
 #      - name: Install npm dependencies
 #        run: yarn --cwd packages/ip/ install
 #      - name: Run tests
