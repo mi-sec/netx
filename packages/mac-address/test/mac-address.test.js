@@ -5,13 +5,22 @@
  *******************************************************************************************************/
 'use strict';
 
-import chai from 'chai';
+const
+	chai       = require( 'chai' ),
+	{ expect } = chai;
 
-const { expect } = chai;
+const macAddress                       = require( '../lib/mac-address' );
+const { isValidMACAddress, MAC_BYTES } = macAddress;
 
-import macAddress, { isValidMACAddress, MAC_BYTES } from '../lib/mac-address.js';
+describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version }`, function () {
+	it( 'macAddress should error', () => {
+		expect( () => macAddress() )
+			.to.throw( 'mac address is required' );
 
-describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version }`, function() {
+		expect( () => macAddress( [] ) )
+			.to.throw( 'mac address must be a number or string' );
+	} );
+
 	it( 'convert 0x0 MAC Address with any delimiter to buffer', () => {
 		expect( macAddress( '00:00:00:00:00:00' ) )
 			.to.have.length( MAC_BYTES )
@@ -45,6 +54,14 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 	it( 'expect malformed MAC Address to throw error', () => {
 		expect( () => macAddress( '1234567890ZZ' ) )
 			.to.throw( 'malformed IEEE 802 MAC-48 address "1234567890ZZ"' );
+	} );
+
+	it( 'isValidMACAddress should error', () => {
+		expect( () => isValidMACAddress() )
+			.to.throw( 'mac address is required' );
+
+		expect( () => isValidMACAddress( 123 ) )
+			.to.throw( 'mac address must be a string' );
 	} );
 
 	it( 'should validate MAC Address (canonical)', () => {

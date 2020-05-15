@@ -2,29 +2,20 @@
 	"name": "@mi-sec/mac-address",
 	"version": "1.0.9",
 	"description": "MAC Address utility",
-	"type": "module",
-	"main": "./cjs/mac-address.js",
-	"module": "./lib/mac-address.js",
+	"main": "./lib/mac-address.js",
 	"exports": {
 		".": {
-			"require": "./cjs/mac-address.js",
-			"default": "./lib/mac-address.js"
-		}
+			"require": "./lib/mac-address.js",
+			"import": "./esm/mac-address.mjs"
+		},
+		"./": "./"
 	},
 	"scripts": {
-		"build": "webpack --config webpack.config.cjs",
+		"build": "gen-esm-wrapper ./lib/* ./esm/ip.mjs",
 		"lint": "eslint .",
-		"postbuild": "echo '{\n    \"type\": \"commonjs\"\n}' > ./cjs/package.json",
-		"test": "mocha"
+		"test": "nyc --reporter=lcov --reporter=text-summary mocha",
+		"testing": "nyc mocha"
 	},
-	"directories": {
-		"lib": "lib",
-		"cjs": "cjs"
-	},
-	"files": [
-		"lib",
-		"cjs"
-	],
 	"keywords": [
 		"netx",
 		"mac-address",
@@ -42,13 +33,12 @@
 	},
 	"devDependencies": {
 		"chai": "4.2.0",
-		"eslint": "6.8.0",
-		"mocha": "7.1.1",
-		"webpack": "4.42.1",
-		"webpack-cli": "3.3.11"
+		"eslint": "7.0.0",
+		"gen-esm-wrapper": "1.0.6",
+		"mocha": "7.1.2",
+		"nyc": "15.0.1"
 	},
 	"publishConfig": {
 		"access": "public"
-	},
-	"gitHead": "8c01b2355a814c21f472496e02a3b67c722b4af2"
+	}
 }

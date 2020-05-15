@@ -11,7 +11,7 @@
  * a mac address is a 6 byte combination of hex characters typically delineated by `:`
  * @type {number}
  */
-export const MAC_BYTES = 6;
+const MAC_BYTES = 6;
 
 /**
  * MAC_MAX_LENGTH
@@ -19,9 +19,9 @@ export const MAC_BYTES = 6;
  * excluding the delimiter, a mac address is 12 characters long
  * @type {number}
  */
-export const MAC_MAX_LENGTH = 12;
+const MAC_MAX_LENGTH = 12;
 
-export function isValidMACAddress( mac ) {
+function isValidMACAddress( mac ) {
 	if ( !mac ) {
 		throw new Error( 'mac address is required' );
 	}
@@ -74,4 +74,7 @@ function macAddress( mac ) {
 	return macBuf;
 }
 
-export default macAddress;
+module.exports                   = macAddress;
+module.exports.MAC_BYTES         = MAC_BYTES;
+module.exports.MAC_MAX_LENGTH    = MAC_MAX_LENGTH;
+module.exports.isValidMACAddress = isValidMACAddress;
