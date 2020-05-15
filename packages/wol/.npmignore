@@ -5,4 +5,6 @@
 .eslint*
 .nyc_output
 coverage
+lcov.*
+lcov-*
 test
