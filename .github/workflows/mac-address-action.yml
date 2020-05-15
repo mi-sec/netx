@@ -6,7 +6,6 @@ on:
       - '*.*'
     paths:
       - 'packages/mac-address/**'
-
   pull_request:
     tags-ignore:
       - '*.*'
@@ -46,17 +45,5 @@ jobs:
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
+          path-to-lcov: packages/mac-address/coverage/lcov.info
           github-token: ${{ secrets.ACCESS_TOKEN }}
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js 14.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: 14.x
-      - name: install npm dependencies
-        run: yarn --cwd packages/mac-address/ install
-      - name: run tests
-        run: yarn --cwd packages/mac-address/ build
