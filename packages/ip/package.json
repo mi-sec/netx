@@ -6,23 +6,15 @@
 	"exports": {
 		".": {
 			"require": "./lib/ip.js",
-			"import": "./dist/ip.mjs"
+			"import": "./esm/ip.mjs"
 		},
 		"./": "./"
 	},
 	"scripts": {
-		"build": "gen-esm-wrapper ./lib/* ./dist/ip.mjs",
+		"build": "gen-esm-wrapper ./lib/* ./esm/ip.mjs",
 		"lint": "eslint .",
-		"test": "nyc --reporter=json-summary mocha"
+		"test": "nyc --reporter=lcov --reporter=text-summary mocha"
 	},
-	"directories": {
-		"lib": "lib",
-		"dist": "dist"
-	},
-	"files": [
-		"lib",
-		"dist"
-	],
 	"keywords": [
 		"netx",
 		"ip",

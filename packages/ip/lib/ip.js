@@ -15,6 +15,10 @@ function validIPv4( ip ) {
 }
 
 function longToIp( long ) {
+	if ( long < 0 ) {
+		throw new Error( `invalid long: ${ long }` );
+	}
+
 	return [
 		( long & ( 0xFF << 24 ) ) >>> 24,
 		( long & ( 0xFF << 16 ) ) >>> 16,
