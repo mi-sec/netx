@@ -3,5 +3,6 @@
 .idea
 .editorconfig
 .eslint*
-
+.nyc_output
+coverage
 test
