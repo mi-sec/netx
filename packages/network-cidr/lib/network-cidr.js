@@ -5,6 +5,8 @@
  *******************************************************************************************************/
 'use strict';
 
+const ip = require( '@mi-sec/ip' );
+
 class NetworkCidr
 {
 	constructor( net, mask )

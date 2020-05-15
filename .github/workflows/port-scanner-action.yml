@@ -24,8 +24,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - run: yarn --cwd packages/port-scanner/ install
-      - run: yarn --cwd packages/port-scanner/ lint
+      - run: npm ci --silent --prefix packages/port-scanner/
+      - run: npm run --prefix packages/port-scanner/ lint
 
   test:
     runs-on: ubuntu-latest
@@ -39,9 +39,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: install npm dependencies
-        run: yarn --cwd packages/port-scanner/ install
+        run: npm ci --silent --prefix packages/port-scanner/
       - name: run tests
-        run: yarn --cwd packages/port-scanner/ test
+        run: npm run --prefix packages/port-scanner/ test
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:

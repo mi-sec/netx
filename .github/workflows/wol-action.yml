@@ -24,8 +24,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - run: yarn --cwd packages/wol/ install
-      - run: yarn --cwd packages/wol/ lint
+      - run: npm ci --silent --prefix packages/wol/
+      - run: npm run --prefix packages/wol/ lint
 
   test:
     runs-on: ubuntu-latest
@@ -39,9 +39,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: install npm dependencies
-        run: yarn --cwd packages/wol/ install
+        run: npm ci --silent --prefix packages/wol/
       - name: run tests
-        run: yarn --cwd packages/wol/ test
+        run: npm run --prefix packages/wol/ test
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:

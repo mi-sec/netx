@@ -2,29 +2,20 @@
 	"name": "@mi-sec/network-cidr",
 	"version": "1.0.1",
 	"description": "network cidr utility",
-	"type": "module",
-	"main": "./cjs/network-cidr.js",
-	"module": "./lib/network-cidr.js",
+	"main": "./lib/network-cidr.js",
 	"exports": {
 		".": {
-			"require": "./cjs/network-cidr.js",
-			"default": "./lib/network-cidr.js"
-		}
+			"require": "./lib/network-cidr.js",
+			"import": "./esm/network-cidr.mjs"
+		},
+		"./": "./"
 	},
 	"scripts": {
-		"build": "webpack --config webpack.config.cjs",
+		"build": "gen-esm-wrapper ./lib/* ./esm/network-cidr.mjs",
 		"lint": "eslint .",
-		"postbuild": "echo '{\n    \"type\": \"commonjs\"\n}' > ./cjs/package.json",
-		"test": "mocha"
+		"test": "nyc --reporter=lcov --reporter=text-summary mocha",
+		"testd": "nyc mocha"
 	},
-	"directories": {
-		"lib": "lib",
-		"cjs": "cjs"
-	},
-	"files": [
-		"lib",
-		"cjs"
-	],
 	"keywords": [
 		"netx",
 		"cidr",
@@ -43,12 +34,15 @@
 	"bugs": {
 		"url": "https://github.com/mi-sec/netx/issues"
 	},
+	"dependencies": {
+		"@mi-sec/ip": "latest"
+	},
 	"devDependencies": {
 		"chai": "4.2.0",
-		"eslint": "6.8.0",
-		"mocha": "7.1.1",
-		"webpack": "4.42.1",
-		"webpack-cli": "3.3.11"
+		"eslint": "7.0.0",
+		"gen-esm-wrapper": "1.0.6",
+		"mocha": "7.1.2",
+		"nyc": "15.0.1"
 	},
 	"publishConfig": {
 		"access": "public"
