@@ -5,13 +5,15 @@
  *******************************************************************************************************/
 'use strict';
 
-import chai from 'chai';
+const
+	chai       = require( 'chai' ),
+	{ expect } = chai;
 
-const { expect } = chai;
+const
+	wakeOnLan             = require( '../lib/wol' ),
+	{ createMagicPacket } = wakeOnLan;
 
-import wakeOnLan, { createMagicPacket } from '../lib/wol.js';
-
-describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version }`, function() {
+describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version }`, function () {
 	it( 'createMagicPacket should create a magic packet (0-mac)', () => {
 		expect( createMagicPacket( '00:00:00:00:00:00' ) )
 			.to.deep.equal( Buffer.from( [

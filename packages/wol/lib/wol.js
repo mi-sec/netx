@@ -5,14 +5,17 @@
  *******************************************************************************************************/
 'use strict';
 
-import dgram from 'dgram';
-import net   from 'net';
+const
+	dgram = require( 'dgram' ),
+	net   = require( 'net' );
 
-import macAddress, { MAC_BYTES } from '@mi-sec/mac-address';
+const
+	macAddress    = require( '@mi-sec/mac-address' ),
+	{ MAC_BYTES } = macAddress;
 
-export const MAGIC_PACKET_MAC_COPIES = 16;
+const MAGIC_PACKET_MAC_COPIES = 16;
 
-export function createMagicPacket( mac ) {
+function createMagicPacket( mac ) {
 	mac = macAddress( mac );
 
 	const buf = Buffer.alloc( ( 1 + MAGIC_PACKET_MAC_COPIES ) * MAC_BYTES );
@@ -100,4 +103,6 @@ async function wakeOnLan( mac, opts = {} ) {
 	};
 }
 
-export default wakeOnLan;
+module.exports                         = wakeOnLan;
+module.exports.MAGIC_PACKET_MAC_COPIES = MAGIC_PACKET_MAC_COPIES;
+module.exports.createMagicPacket       = createMagicPacket;

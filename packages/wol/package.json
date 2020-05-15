@@ -2,32 +2,24 @@
 	"name": "@mi-sec/wol",
 	"version": "1.0.7",
 	"description": "Wake-On-LAN utility",
-	"type": "module",
-	"main": "./cjs/wol.js",
-	"module": "./lib/wol.js",
+	"main": "./lib/wol.js",
 	"exports": {
 		".": {
-			"require": "./cjs/wol.js",
-			"default": "./lib/wol.js"
-		}
+			"require": "./lib/wol.js",
+			"import": "./esm/wol.mjs"
+		},
+		"./": "./"
 	},
 	"scripts": {
-		"build": "webpack --config webpack.config.cjs",
+		"build": "gen-esm-wrapper ./lib/* ./esm/wol.mjs",
 		"lint": "eslint .",
-		"postbuild": "echo '{\n    \"type\": \"commonjs\"\n}' > ./cjs/package.json",
-		"test": "mocha"
+		"test": "nyc --reporter=lcov --reporter=text-summary mocha",
+		"testd": "NODE_ENV=TESTING nyc mocha"
 	},
-	"directories": {
-		"lib": "lib",
-		"cjs": "cjs"
-	},
-	"files": [
-		"lib",
-		"cjs"
-	],
 	"keywords": [
 		"netx",
-		"wake-on-lan"
+		"wake-on-lan",
+		"mi-sec"
 	],
 	"author": "MI-SEC",
 	"license": "MIT",
@@ -40,17 +32,16 @@
 		"url": "https://github.com/mi-sec/netx/issues"
 	},
 	"dependencies": {
-		"@mi-sec/mac-address": "latest"
+		"@mi-sec/mac-address": "1.0.10"
 	},
 	"devDependencies": {
 		"chai": "4.2.0",
-		"eslint": "6.8.0",
-		"mocha": "7.1.1",
-		"webpack": "4.42.1",
-		"webpack-cli": "3.3.11"
+		"eslint": "7.0.0",
+		"gen-esm-wrapper": "1.0.6",
+		"mocha": "7.1.2",
+		"nyc": "15.0.1"
 	},
 	"publishConfig": {
 		"access": "public"
-	},
-	"gitHead": "8c01b2355a814c21f472496e02a3b67c722b4af2"
+	}
 }
