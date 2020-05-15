@@ -11,7 +11,6 @@ const
 	LightMap             = require( '@mi-sec/lightmap' ),
 	NetworkCidr          = require( '@mi-sec/network-cidr' );
 
-console.log( NetworkCidr );
 const commonPorts = new LightMap( [
 	[ 7, 'echo' ],
 	[ 9, 'discard' ],

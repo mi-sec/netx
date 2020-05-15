@@ -6,19 +6,24 @@
 'use strict';
 
 const
-	net        = require( 'net' ),
-	chai       = require( 'chai' ),
-	{ expect } = chai;
+	chai                     = require( 'chai' ),
+	net                      = require( 'net' ),
+	{ ADDRCONFIG, V4MAPPED } = require( 'dns' ),
+	{ expect }               = chai;
 
 const
-	PortScanner                   = require( '../lib/port-scanner' ),
-	{ convertHighResolutionTime } = PortScanner;
+	PortScanner = require( '../lib/port-scanner' ),
+	{
+		connect,
+		convertHighResolutionTime
+	}           = PortScanner;
 
+const
+	host   = '127.0.0.1/32',
+	banner = 'hello\r\n';
+
+// TODO: these tests are a bit flaky and rely on assumed compute drift timeouts. circle back sometime
 describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version } localhost`, function () {
-	const
-		host   = '127.0.0.1/32',
-		banner = 'hello\r\n';
-
 	let server, ports;
 
 	beforeEach( ( done ) => {
@@ -49,7 +54,7 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 		} );
 	} );
 
-	it( `should scan target ${ host } and determine it "open" with banner "hello\\r\\n"`, async () => {
+	it( `should scan target ${ host } and determine "open" with banner "hello\\r\\n"`, async () => {
 		const start  = process.hrtime();
 		const result = new PortScanner( { host, ports, attemptToIdentify: true } );
 
@@ -64,7 +69,7 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 
 		const end = convertHighResolutionTime( process.hrtime( start ) );
 
-		expect( end ).to.be.lte( 5.0 );
+		expect( end ).to.be.lte( 10.0 );
 
 		expect( data ).to.be.an( 'object' );
 		expect( data ).to.have.property( 'host' ).and.be.a( 'string' ).and.eq( host.split( '/' )[ 0 ] );
@@ -81,7 +86,34 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 		expect( done.get( key ) ).to.deep.eq( data );
 	} );
 
-	it( `should scan target ${ host } and determine it "close"`, async () => {
+	it( `should scan target ${ host } and determine "timeout"`, async () => {
+		const port = ports[ 0 ];
+		let d1, d2;
+
+		d1 = await connect( host, port, { timeout: 1, onlyReportOpen: true } );
+
+		try {
+			await connect( host, port, {
+				timeout: 0,
+				connectionOpts: {
+					hints: ADDRCONFIG | V4MAPPED
+				}
+			} );
+		}
+		catch ( e ) {
+			d2 = e;
+		}
+
+		expect( d1 ).to.eq( undefined );
+
+		expect( d2 ).to.be.an( 'object' );
+		expect( d2 ).to.have.property( 'host' ).and.eq( host );
+		expect( d2 ).to.have.property( 'port' ).and.eq( port );
+		expect( d2 ).to.have.property( 'status' ).and.eq( 'closed' );
+		expect( d2 ).to.have.property( 'error' ).and.be.an.instanceOf( Error );
+	} );
+
+	it( `should scan target ${ host } and determine "close"`, async () => {
 		server.close();
 
 		const start  = process.hrtime();
@@ -97,7 +129,7 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 		await result.scan();
 		const end = convertHighResolutionTime( process.hrtime( start ) );
 
-		expect( end ).to.be.lte( 5.0 );
+		expect( end ).to.be.lte( 10.0 );
 
 		expect( data ).to.be.an( 'object' );
 		expect( data ).to.have.property( 'host' ).and.be.a( 'string' ).and.eq( host.split( '/' )[ 0 ] );
@@ -168,7 +200,6 @@ describe( [
 			.on( 'progress', ( d ) => progress = d )
 			.on( 'done', ( d ) => {
 				expect( progress ).to.be.a( 'number' ).and.eq( 1 );
-				y;
 
 				expect( d.size ).to.eq( 4 );
 				expect( d.has( '127.0.0.1:80' ) ).to.eq( true );
