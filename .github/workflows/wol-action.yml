@@ -1,4 +1,4 @@
-name: wol unit test
+name: '@mi-sec/wol action'
 
 on:
   push:
@@ -6,23 +6,44 @@ on:
       - '*.*'
     paths:
       - 'packages/wol/**'
+  pull_request:
+    tags-ignore:
+      - '*.*'
+    paths:
+      - 'packages/wol/**'
+
+env:
+  CI: true
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - run: yarn --cwd packages/wol/ install
+      - run: yarn --cwd packages/wol/ lint
+
   test:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        # node-version: [ 8.x, 10.x, 12.x ]
-        node-version: [ 13.x ]
-
+        node-version: [ 12.x, 14.x ]
     steps:
-      - uses: actions/checkout@v1
-      - name: "Test: Use Node.js ${{ matrix.node-version }}"
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install dependencies
-        run: npm ci --silent --prefix packages/wol/
-      - name: test
-        run: npm run --prefix packages/wol/ test
+      - name: install npm dependencies
+        run: yarn --cwd packages/wol/ install
+      - name: run tests
+        run: yarn --cwd packages/wol/ test
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          path-to-lcov: ${{ github.workspace }}/packages/wol/coverage/lcov.info
+          github-token: ${{ secrets.ACCESS_TOKEN }}

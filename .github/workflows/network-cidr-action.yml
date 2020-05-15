@@ -1,4 +1,4 @@
-name: network-cidr lint test
+name: '@mi-sec/network-cidr action'
 
 on:
   push:
@@ -6,17 +6,44 @@ on:
       - '*.*'
     paths:
       - 'packages/network-cidr/**'
+  pull_request:
+    tags-ignore:
+      - '*.*'
+    paths:
+      - 'packages/network-cidr/**'
+
+env:
+  CI: true
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - name: "Lint: Use Node.js 12.x"
+      - uses: actions/checkout@v2
+      - name: Use Node.js 12.x
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - name: Install dependencies
-        run: npm ci --silent --prefix packages/network-cidr/
-      - name: lint
-        run: npm run --prefix packages/network-cidr/ lint
+      - run: yarn --cwd packages/network-cidr/ install
+      - run: yarn --cwd packages/network-cidr/ lint
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [ 12.x, 14.x ]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: install npm dependencies
+        run: yarn --cwd packages/network-cidr/ install
+      - name: run tests
+        run: yarn --cwd packages/network-cidr/ test
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          path-to-lcov: ${{ github.workspace }}/packages/network-cidr/coverage/lcov.info
+          github-token: ${{ secrets.ACCESS_TOKEN }}
