@@ -46,16 +46,3 @@ jobs:
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.ACCESS_TOKEN }}
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js 14.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: 14.x
-      - name: install npm dependencies
-        run: yarn --cwd packages/ip/ install
-      - name: run tests
-        run: yarn --cwd packages/ip/ build
