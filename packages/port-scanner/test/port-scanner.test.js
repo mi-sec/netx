@@ -5,12 +5,14 @@
  *******************************************************************************************************/
 'use strict';
 
-import net  from 'net';
-import chai from 'chai';
+const
+	net        = require( 'net' ),
+	chai       = require( 'chai' ),
+	{ expect } = chai;
 
-const { expect } = chai;
-
-import PortScanner, { convertHighResolutionTime } from '../lib/port-scanner.js';
+const
+	PortScanner                   = require( '../lib/port-scanner' ),
+	{ convertHighResolutionTime } = PortScanner;
 
 describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version } localhost`, function () {
 	const
@@ -165,7 +167,8 @@ describe( [
 			.on( 'data', ( d ) => data.push( d ) )
 			.on( 'progress', ( d ) => progress = d )
 			.on( 'done', ( d ) => {
-				expect( progress ).to.be.a( 'number' ).and.eq( 1 );y
+				expect( progress ).to.be.a( 'number' ).and.eq( 1 );
+				y;
 
 				expect( d.size ).to.eq( 4 );
 				expect( d.has( '127.0.0.1:80' ) ).to.eq( true );

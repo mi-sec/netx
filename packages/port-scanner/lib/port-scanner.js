@@ -5,12 +5,14 @@
  *******************************************************************************************************/
 'use strict';
 
-import { createConnection } from 'net';
-import { EventEmitter }     from 'events';
-import LightMap             from '@mi-sec/lightmap';
-import NetworkCidr          from '@mi-sec/network-cidr';
+const
+	{ createConnection } = require( 'net' ),
+	{ EventEmitter }     = require( 'events' ),
+	LightMap             = require( '@mi-sec/lightmap' ),
+	NetworkCidr          = require( '@mi-sec/network-cidr' );
 
-export const commonPorts = new LightMap( [
+console.log( NetworkCidr );
+const commonPorts = new LightMap( [
 	[ 7, 'echo' ],
 	[ 9, 'discard' ],
 	[ 13, 'daytime' ],
@@ -113,7 +115,7 @@ export const commonPorts = new LightMap( [
 	[ 49157, 'unknown' ]
 ] );
 
-export function convertHighResolutionTime( t ) {
+function convertHighResolutionTime( t ) {
 	return ( ( t[ 0 ] * 1e9 ) + t[ 1 ] ) / 1e6;
 }
 
@@ -142,7 +144,7 @@ export function convertHighResolutionTime( t ) {
  * 	service: 'ssh'
  * }
  */
-export function connect( host, port, opts = {} ) {
+function connect( host, port, opts = {} ) {
 	!opts.debug || console.log( `scanning ${ host }:${ port }` );
 
 	return new Promise(
@@ -244,7 +246,7 @@ export function connect( host, port, opts = {} ) {
 	);
 }
 
-export default class PortScanner extends EventEmitter
+class PortScanner extends EventEmitter
 {
 	constructor( opts = {} )
 	{
@@ -313,3 +315,8 @@ export default class PortScanner extends EventEmitter
 		this.emit( 'done', this.result );
 	}
 }
+
+module.exports                           = PortScanner;
+module.exports.commonPorts               = commonPorts;
+module.exports.convertHighResolutionTime = convertHighResolutionTime;
+module.exports.connect                   = connect;
