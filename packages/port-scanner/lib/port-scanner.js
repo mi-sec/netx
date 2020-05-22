@@ -258,7 +258,7 @@ class PortScanner extends EventEmitter
 			Array.isArray( this.opts.ports ) ? this.opts.ports : [ this.opts.ports ] :
 			[ ...commonPorts.keys() ];
 
-		this.opts.timeout = this.opts.timeout || 500;
+		this.opts.timeout = this.opts.timeout || 1000;
 
 		this.opts.debug           = this.opts.hasOwnProperty( 'debug' ) ? this.opts.debug : false;
 		this.opts.onlyReportOpen  = this.opts.hasOwnProperty( 'onlyReportOpen' ) ? this.opts.onlyReportOpen : true;
@@ -273,7 +273,7 @@ class PortScanner extends EventEmitter
 		!this.opts.debug || console.log( `  debug: ${ this.opts.debug }` );
 		!this.opts.debug || console.log( `  onlyReportOpen: ${ this.opts.onlyReportOpen }` );
 		!this.opts.debug || console.log( `  bannerGrab: ${ this.opts.bannerGrab }` );
-		!this.opts.debug || console.log( `  attemptToIdentify: ${ this.opts.attemptToIdentify }` );
+		!this.opts.debug || console.log( `  identifyService: ${ this.opts.identifyService }` );
 
 		this.result = new LightMap();
 

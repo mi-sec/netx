@@ -14,14 +14,22 @@ port scanner utility
 
 ### Usage
 
+*`connectionOpts` is a direct pass in to
+[`net.createConnection(<opts>)`](https://nodejs.org/api/net.html#net_socket_connect_options_connectlistener)
+
 ```
 import PortScanner from '@mi-sec/port-scanner';
 
 const scan = new PortScanner( {
 	host: '192.168.1.0/24',
 	ports: [ 22 ],
-	timeout: 100,
-	attemptToIdentify: true
+	timeout: 1000,           // optional
+    debug: false,            // optional
+    onlyReportOpen: true,    // optional
+    bannerGrab: true,        // optional
+    identifyService: true,   // optional
+	attemptToIdentify: true, // optional
+    connectionOpts: {}       // optional*
 } );
 
 const data   = [];
