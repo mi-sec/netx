@@ -58,7 +58,10 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 		const start  = process.hrtime();
 		const result = new PortScanner( { host, ports, attemptToIdentify: true } );
 
-		let data, progress, done;
+		let
+			data     = [],
+			progress = 0,
+			done     = null;
 
 		result
 			.on( 'data', ( d ) => data = d )
@@ -119,7 +122,10 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 		const start  = process.hrtime();
 		const result = new PortScanner( { host, ports, onlyReportOpen: false } );
 
-		let data, progress, done;
+		let
+			data     = [],
+			progress = 0,
+			done     = null;
 
 		result
 			.on( 'data', ( d ) => data = d )
@@ -144,6 +150,35 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 		const key = `${ data.host }:${ data.port }`;
 		expect( done.has( key ) ).to.eq( true );
 		expect( done.get( key ) ).to.deep.eq( data );
+	} );
+
+	it( `should scan target ${ host } and determine "close" and not report it`, async () => {
+		server.close();
+
+		const start  = process.hrtime();
+		const result = new PortScanner( { host, ports, debug: true, onlyReportOpen: true } );
+
+		let
+			data     = [],
+			progress = 0,
+			done     = null;
+
+		result
+			.on( 'data', ( d ) => data = d )
+			.on( 'progress', ( d ) => progress = d )
+			.on( 'done', ( d ) => done = d );
+
+		await result.scan();
+		const end = convertHighResolutionTime( process.hrtime( start ) );
+
+		expect( end ).to.be.lte( 10.0 );
+		expect( data ).to.be.an( 'array' );
+		expect( data ).to.deep.eq( [] );
+		expect( progress ).to.be.a( 'number' ).and.eq( 1 );
+
+		const key = `127.0.0.1:${ ports[ 0 ] }`;
+		expect( done.has( key ) ).to.eq( true );
+		expect( done.get( key ) ).to.eq( undefined );
 	} );
 
 	after( ( done ) => {

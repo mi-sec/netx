@@ -210,7 +210,7 @@ function connect( host, port, opts = {} ) {
 			} );
 
 			socket.on( 'close', ( e ) => {
-				if ( !status && opts.onlyReportOpen ) {
+				if ( ( !status || status === 'closed' ) && opts.onlyReportOpen ) {
 					return res();
 				}
 
@@ -224,7 +224,7 @@ function connect( host, port, opts = {} ) {
 					data.banner = banner;
 					data.time   = time;
 
-					if ( opts.attemptToIdentify ) {
+					if ( opts.identifyService ) {
 						data.service = commonPorts.get( port ) || 'unknown';
 					}
 				}
@@ -265,15 +265,15 @@ class PortScanner extends EventEmitter
 		this.opts.bannerGrab      = this.opts.hasOwnProperty( 'bannerGrab' ) ? this.opts.bannerGrab : true;
 		this.opts.identifyService = this.opts.hasOwnProperty( 'identifyService' ) ? this.opts.identifyService : true;
 
-		!this.opts.debug || console.log( 'starting scan with options' );
-		!this.opts.debug || console.log( `  host: ${ this.opts.host }` );
-		!this.opts.debug || console.log( `  cidr: ${ this.opts.cidr }` );
-		!this.opts.debug || console.log( `  ports: ${ this.opts.ports }` );
-		!this.opts.debug || console.log( `  timeout: ${ this.opts.timeout }` );
-		!this.opts.debug || console.log( `  debug: ${ this.opts.debug }` );
-		!this.opts.debug || console.log( `  onlyReportOpen: ${ this.opts.onlyReportOpen }` );
-		!this.opts.debug || console.log( `  bannerGrab: ${ this.opts.bannerGrab }` );
-		!this.opts.debug || console.log( `  identifyService: ${ this.opts.identifyService }` );
+		this.debug( 'starting scan with options' );
+		this.debug( `  host: ${ this.opts.host }` );
+		this.debug( `  cidr: ${ this.opts.cidr }` );
+		this.debug( `  ports: ${ this.opts.ports }` );
+		this.debug( `  timeout: ${ this.opts.timeout }` );
+		this.debug( `  debug: ${ this.opts.debug }` );
+		this.debug( `  onlyReportOpen: ${ this.opts.onlyReportOpen }` );
+		this.debug( `  bannerGrab: ${ this.opts.bannerGrab }` );
+		this.debug( `  identifyService: ${ this.opts.identifyService }` );
 
 		this.result = new LightMap();
 
@@ -282,15 +282,14 @@ class PortScanner extends EventEmitter
 
 	async scan()
 	{
-		const data = [];
+		const
+			hosts = this.opts.cidr.hosts(),
+			total = this.opts.cidr.size * this.opts.ports.length,
+			data  = [];
 
-		let
-			progress = 0,
-			total    = 0;
+		let progress = 0;
 
-		for ( const host of this.opts.cidr.hosts() ) {
-			total += this.opts.ports.length;
-
+		for ( const host of hosts ) {
 			for ( let i = 0; i < this.opts.ports.length; i++ ) {
 				const
 					port = this.opts.ports[ i ],
@@ -312,6 +311,12 @@ class PortScanner extends EventEmitter
 
 		await Promise.all( data );
 		this.emit( 'done', this.result );
+	}
+
+	debug( ...msg ) {
+		if ( this.opts.debug ) {
+			console.log( ...msg );
+		}
 	}
 }
 
