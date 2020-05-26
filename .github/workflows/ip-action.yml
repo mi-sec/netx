@@ -44,8 +44,7 @@ jobs:
         run: |
           npm run --prefix packages/ip/ test
           cat packages/ip/coverage/lcov.info
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
+      - name: codecov
+        uses: codecov/codecov-action@v1
         with:
-          path-to-lcov: packages/ip/coverage/lcov.info
-          github-token: ${{ secrets.ACCESS_TOKEN }}
+          file: packages/ip/coverage/lcov.info

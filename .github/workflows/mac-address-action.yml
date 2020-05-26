@@ -42,8 +42,7 @@ jobs:
         run: npm ci --silent --prefix packages/mac-address/
       - name: run tests
         run: npm run --prefix packages/mac-address/ test
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
+      - name: codecov
+        uses: codecov/codecov-action@v1
         with:
-          path-to-lcov: packages/mac-address/coverage/lcov.info
-          github-token: ${{ secrets.ACCESS_TOKEN }}
+          file: packages/mac-address/coverage/lcov.info

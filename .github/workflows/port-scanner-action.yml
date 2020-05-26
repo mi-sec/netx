@@ -42,8 +42,7 @@ jobs:
         run: npm ci --silent --prefix packages/port-scanner/
       - name: run tests
         run: npm run --prefix packages/port-scanner/ test
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
+      - name: codecov
+        uses: codecov/codecov-action@v1
         with:
-          path-to-lcov: packages/port-scanner/coverage/lcov.info
-          github-token: ${{ secrets.ACCESS_TOKEN }}
+          file: packages/port-scanner/coverage/lcov.info
