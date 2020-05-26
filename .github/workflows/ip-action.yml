@@ -3,12 +3,12 @@ name: '@mi-sec/ip action'
 on:
   push:
     tags-ignore:
-      - '*.*'
+      - '**'
     paths:
       - 'packages/ip/**'
   pull_request:
     tags-ignore:
-      - '*.*'
+      - '**'
     paths:
       - 'packages/ip/**'
 

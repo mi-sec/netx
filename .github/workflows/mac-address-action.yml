@@ -3,12 +3,12 @@ name: '@mi-sec/mac-address action'
 on:
   push:
     tags-ignore:
-      - '*.*'
+      - '**'
     paths:
       - 'packages/mac-address/**'
   pull_request:
     tags-ignore:
-      - '*.*'
+      - '**'
     paths:
       - 'packages/mac-address/**'
 

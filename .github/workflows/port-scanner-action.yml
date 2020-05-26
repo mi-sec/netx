@@ -3,12 +3,12 @@ name: '@mi-sec/port-scanner action'
 on:
   push:
     tags-ignore:
-      - '*.*'
+      - '**'
     paths:
       - 'packages/port-scanner/**'
   pull_request:
     tags-ignore:
-      - '*.*'
+      - '**'
     paths:
       - 'packages/port-scanner/**'
 

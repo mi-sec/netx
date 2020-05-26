@@ -3,12 +3,12 @@ name: '@mi-sec/network-cidr action'
 on:
   push:
     tags-ignore:
-      - '*.*'
+      - '**'
     paths:
       - 'packages/network-cidr/**'
   pull_request:
     tags-ignore:
-      - '*.*'
+      - '**'
     paths:
       - 'packages/network-cidr/**'
 

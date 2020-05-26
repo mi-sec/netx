@@ -3,12 +3,12 @@ name: '@mi-sec/wol action'
 on:
   push:
     tags-ignore:
-      - '*.*'
+      - '**'
     paths:
       - 'packages/wol/**'
   pull_request:
     tags-ignore:
-      - '*.*'
+      - '**'
     paths:
       - 'packages/wol/**'
 
