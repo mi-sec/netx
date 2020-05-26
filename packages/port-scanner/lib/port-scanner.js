@@ -251,12 +251,17 @@ class PortScanner extends EventEmitter
 	{
 		super();
 
-		this.opts = opts;
+		this.opts      = opts;
+		this.opts.cidr = new NetworkCidr( this.opts.host || '127.0.0.1' );
 
-		this.opts.cidr  = new NetworkCidr( this.opts.host || '127.0.0.1' );
-		this.opts.ports = this.opts.ports ?
-			Array.isArray( this.opts.ports ) ? this.opts.ports : [ this.opts.ports ] :
-			[ ...commonPorts.keys() ];
+		if ( this.opts.ports ) {
+			if ( !Array.isArray( this.opts.ports ) ) {
+				this.opts.ports = [ this.opts.ports ];
+			}
+		}
+		else {
+			this.opts.ports = [ ...commonPorts.keys() ];
+		}
 
 		this.opts.timeout = this.opts.timeout || 1000;
 
@@ -280,6 +285,30 @@ class PortScanner extends EventEmitter
 		setImmediate( () => this.emit( 'ready', this.opts ) );
 	}
 
+	static isRange( n )
+	{
+		return !!n && n === '' + n && /\d+-\d+/.test( n );
+	}
+
+	static * portRangeIterator( ports )
+	{
+		for ( let i = 0; i < ports.length; i++ ) {
+			const p = ports[ i ];
+
+			if ( PortScanner.isRange( p ) ) {
+				let [ x, y ] = p.split( '-' );
+				x            = +x;
+				y            = +y;
+				while ( x <= y ) {
+					yield x++;
+				}
+			}
+			else {
+				yield p;
+			}
+		}
+	}
+
 	async scan()
 	{
 		const
@@ -290,10 +319,9 @@ class PortScanner extends EventEmitter
 		let progress = 0;
 
 		for ( const host of hosts ) {
-			for ( let i = 0; i < this.opts.ports.length; i++ ) {
+			for ( const port of PortScanner.portRangeIterator( this.opts.ports ) ) {
 				const
-					port = this.opts.ports[ i ],
-					req  = connect( host, port, this.opts )
+					req = connect( host, port, this.opts )
 						.then( ( d ) => {
 							this.result.set( `${ host }:${ port }`, d );
 
@@ -313,7 +341,8 @@ class PortScanner extends EventEmitter
 		this.emit( 'done', this.result );
 	}
 
-	debug( ...msg ) {
+	debug( ...msg )
+	{
 		if ( this.opts.debug ) {
 			console.log( ...msg );
 		}

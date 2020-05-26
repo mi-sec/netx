@@ -14,6 +14,7 @@ const
 const
 	PortScanner = require( '../lib/port-scanner' ),
 	{
+		commonPorts,
 		connect,
 		convertHighResolutionTime
 	}           = PortScanner;
@@ -43,15 +44,62 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 	} );
 
 	it( 'should emit "ready" with options', ( done ) => {
-		const result = new PortScanner( { host, ports } );
+		const result = new PortScanner( { host } );
 
 		result.on( 'ready', ( d ) => {
 			expect( d ).to.be.an( 'object' );
 			expect( d ).to.have.property( 'cidr' );
 			expect( d.cidr ).to.have.property( 'base' ).and.eq( '127.0.0.1' );
 			expect( d.cidr ).to.have.property( 'bitmask' ).and.eq( 32 );
+
+			expect( d.ports ).to.deep.eq( [ ...commonPorts.keys() ] );
 			done();
 		} );
+	} );
+
+	it( 'static.isRange', () => {
+		expect( PortScanner.isRange() ).to.eq( false );
+		expect( PortScanner.isRange( 1 ) ).to.eq( false );
+		expect( PortScanner.isRange( [] ) ).to.eq( false );
+		expect( PortScanner.isRange( '' ) ).to.eq( false );
+		expect( PortScanner.isRange( '-' ) ).to.eq( false );
+		expect( PortScanner.isRange( 'a-b' ) ).to.eq( false );
+		expect( PortScanner.isRange( '1A-2B' ) ).to.eq( false );
+		expect( PortScanner.isRange( '1' ) ).to.eq( false );
+		expect( PortScanner.isRange( '1-' ) ).to.eq( false );
+		expect( PortScanner.isRange( '1-2' ) ).to.eq( true );
+		expect( PortScanner.isRange( '11-22' ) ).to.eq( true );
+		expect( PortScanner.isRange( '111-222' ) ).to.eq( true );
+	} );
+
+	it( 'static.portRangeIterator', () => {
+		const p  = [ 1, 2, '3-5', 6, '7-10' ];
+		const _p = [];
+		for ( const port of PortScanner.portRangeIterator( p ) ) {
+			_p.push( port );
+		}
+
+		expect( _p ).to.have.length( 10 )
+			.and.to.deep.eq( [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ] );
+	} );
+
+	it( 'should iterate and parse range of ports', ( done ) => {
+		const
+			portList = [ 22, '50-60', 70, '70-110', 501, 502, '503-504' ],
+			result   = new PortScanner( {
+				host,
+				ports: portList
+			} );
+
+		result
+			.on( 'ready', async ( d ) => {
+				await result.scan();
+				expect( d.ports ).to.deep.eq( portList );
+			} )
+			.on( 'done', ( d ) => {
+				expect( d.size ).to.eq( 57 );
+				done();
+			} );
 	} );
 
 	it( `should scan target ${ host } and determine "open" with banner "hello\\r\\n"`, async () => {
@@ -120,7 +168,12 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 		server.close();
 
 		const start  = process.hrtime();
-		const result = new PortScanner( { host, ports, onlyReportOpen: false } );
+		const result = new PortScanner( {
+			host,
+			// throw this in to cover "to array" in constructor
+			ports: ports[ 0 ],
+			onlyReportOpen: false
+		} );
 
 		let
 			data     = [],
@@ -156,7 +209,12 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 		server.close();
 
 		const start  = process.hrtime();
-		const result = new PortScanner( { host, ports, debug: true, onlyReportOpen: true } );
+		const result = new PortScanner( {
+			host,
+			ports,
+			debug: true,
+			onlyReportOpen: true
+		} );
 
 		let
 			data     = [],
@@ -209,8 +267,8 @@ describe( [
 		host  = '127.0.0.1/32',
 		ports = [ 22, 80, 5900, 9000 ];
 
-	it( 'should emit "ready" with options', ( done ) => {
-		const result = new PortScanner( { host, ports } );
+	it( 'should emit "ready" with options and scan common ports', ( done ) => {
+		const result = new PortScanner( { host } );
 
 		result.on( 'ready', ( d ) => {
 			expect( d ).to.be.an( 'object' );
@@ -218,12 +276,20 @@ describe( [
 			const t = host.split( '/' );
 			expect( d.cidr ).to.have.property( 'base' ).and.eq( t[ 0 ] );
 			expect( d.cidr ).to.have.property( 'bitmask' ).and.eq( +t[ 1 ] );
+
+			expect( d.ports ).to.deep.eq( [ ...commonPorts.keys() ] );
 			done();
 		} );
 	} );
 
 	it( `should scan target ${ host } for SSH (22), HTTP (80), VNC (5900), AUX (9000)`, ( done ) => {
-		const result = new PortScanner( { host, ports, timeout: 100, attemptToIdentify: true } );
+		const result = new PortScanner( {
+			host,
+			ports,
+			timeout: 500,
+			attemptToIdentify: true
+		} );
+
 		const data   = [];
 		let progress = 0;
 
@@ -237,11 +303,15 @@ describe( [
 				expect( progress ).to.be.a( 'number' ).and.eq( 1 );
 
 				expect( d.size ).to.eq( 4 );
-				expect( d.has( '127.0.0.1:80' ) ).to.eq( true );
-				expect( d.get( '127.0.0.1:80' ) ).to.deep.eq( {
+				expect( d.has( '127.0.0.1:22' ) ).to.eq( true );
+
+				delete d.get( '127.0.0.1:22' ).time;
+				expect( d.get( '127.0.0.1:22' ) ).to.deep.eq( {
 					host: '127.0.0.1',
-					port: 80,
-					status: 'closed'
+					port: 22,
+					status: 'open',
+					banner: 'SSH-2.0-OpenSSH_7.9\r\n',
+					service: 'ssh'
 				} );
 
 				const
