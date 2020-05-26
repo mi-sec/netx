@@ -88,7 +88,8 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 			portList = [ 22, '50-60', 70, '70-110', 501, 502, '503-504' ],
 			result   = new PortScanner( {
 				host,
-				ports: portList
+				ports: portList,
+				onlyReportOpen: false
 			} );
 
 		result
@@ -235,8 +236,7 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 		expect( progress ).to.be.a( 'number' ).and.eq( 1 );
 
 		const key = `127.0.0.1:${ ports[ 0 ] }`;
-		expect( done.has( key ) ).to.eq( true );
-		expect( done.get( key ) ).to.eq( undefined );
+		expect( done.has( key ) ).to.eq( false );
 	} );
 
 	after( ( done ) => {
@@ -265,7 +265,7 @@ describe( [
 
 	const
 		host  = '127.0.0.1/32',
-		ports = [ 22, 80, 5900, 9000 ];
+		ports = [ 22, 5900, 9000 ];
 
 	it( 'should emit "ready" with options and scan common ports', ( done ) => {
 		const result = new PortScanner( { host } );
@@ -282,7 +282,7 @@ describe( [
 		} );
 	} );
 
-	it( `should scan target ${ host } for SSH (22), HTTP (80), VNC (5900), AUX (9000)`, ( done ) => {
+	it( `should scan target ${ host } for SSH (22), VNC (5900), AUX (9000)`, ( done ) => {
 		const result = new PortScanner( {
 			host,
 			ports,
@@ -302,7 +302,7 @@ describe( [
 			.on( 'done', ( d ) => {
 				expect( progress ).to.be.a( 'number' ).and.eq( 1 );
 
-				expect( d.size ).to.eq( 4 );
+				expect( d.size ).to.eq( 3 );
 				expect( d.has( '127.0.0.1:22' ) ).to.eq( true );
 
 				delete d.get( '127.0.0.1:22' ).time;

@@ -338,6 +338,11 @@ class PortScanner extends EventEmitter
 		}
 
 		await Promise.all( data );
+
+		if ( this.opts.onlyReportOpen ) {
+			this.result = this.result.filter( ( v ) => v && v.status === 'open' );
+		}
+
 		this.emit( 'done', this.result );
 	}
 
