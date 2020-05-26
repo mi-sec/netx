@@ -32,7 +32,7 @@
 		"url": "https://github.com/mi-sec/netx/issues"
 	},
 	"dependencies": {
-		"@mi-sec/lightmap": "0.1.6",
+		"@mi-sec/lightmap": "0.1.8",
 		"@mi-sec/network-cidr": "latest"
 	},
 	"devDependencies": {

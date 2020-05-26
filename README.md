@@ -13,3 +13,15 @@ netx is a collection of modules for network interactions
 ```
 npm i netx
 ```
+
+### Release
+
+```
+lerna clean
+lerna bootstrap
+lerna run lint
+lerna run test
+lerna run build
+# push any file changes
+lerna publish
+```
