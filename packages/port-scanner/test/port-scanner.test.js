@@ -6,16 +6,15 @@
 'use strict';
 
 const
-	chai                     = require( 'chai' ),
-	net                      = require( 'net' ),
-	{ ADDRCONFIG, V4MAPPED } = require( 'dns' ),
-	{ expect }               = chai;
+	chai       = require( 'chai' ),
+	net        = require( 'net' ),
+	{ expect } = chai;
 
 const
 	PortScanner = require( '../lib/port-scanner' ),
 	{
 		commonPorts,
-		connect,
+		TCPConnect,
 		convertHighResolutionTime
 	}           = PortScanner;
 
@@ -55,6 +54,11 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 			expect( d.ports ).to.deep.eq( [ ...commonPorts.keys() ] );
 			done();
 		} );
+	} );
+
+	it( '[TCPConnect] should throw error if missing options', () => {
+		expect( () => new TCPConnect( {} ) ).to.throw( 'TCPConnect opts.host is required' );
+		expect( () => new TCPConnect( { host } ) ).to.throw( 'TCPConnect opts.port is required' );
 	} );
 
 	it( 'static.isRange', () => {
@@ -104,8 +108,11 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 	} );
 
 	it( `should scan target ${ host } and determine "open" with banner "hello\\r\\n"`, async () => {
-		const start  = process.hrtime();
-		const result = new PortScanner( { host, ports, attemptToIdentify: true } );
+		const result = new PortScanner( {
+			host,
+			ports,
+			attemptToIdentify: true
+		} );
 
 		let
 			data     = [],
@@ -118,10 +125,6 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 			.on( 'done', ( d ) => done = d );
 
 		await result.scan();
-
-		const end = convertHighResolutionTime( process.hrtime( start ) );
-
-		expect( end ).to.be.lte( 10.0 );
 
 		expect( data ).to.be.an( 'object' );
 		expect( data ).to.have.property( 'host' ).and.be.a( 'string' ).and.eq( host.split( '/' )[ 0 ] );
@@ -138,31 +141,60 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 		expect( done.get( key ) ).to.deep.eq( data );
 	} );
 
+	it( `should scan target ${ host } and determine "open" without banner`, async () => {
+		const result = new PortScanner( {
+			host,
+			ports,
+			bannerGrab: false,
+			attemptToIdentify: true
+		} );
+
+		let
+			data     = [],
+			progress = 0,
+			done     = null;
+
+		result
+			.on( 'data', ( d ) => data = d )
+			.on( 'progress', ( d ) => progress = d )
+			.on( 'done', ( d ) => done = d );
+
+		await result.scan();
+
+		expect( data ).to.be.an( 'object' );
+		expect( data ).to.have.property( 'host' ).and.be.a( 'string' ).and.eq( host.split( '/' )[ 0 ] );
+		expect( data ).to.have.property( 'port' ).and.be.a( 'number' ).and.eq( ports[ 0 ] );
+		expect( data ).to.have.property( 'banner' ).and.be.a( 'string' ).and.eq( '' );
+		expect( data ).to.have.property( 'error' ).and.be.a( 'boolean' ).and.eq( false );
+		expect( data ).to.have.property( 'status' ).and.be.a( 'string' ).and.eq( 'open' );
+		expect( data ).to.have.property( 'opened' ).and.be.a( 'boolean' ).and.eq( true );
+		expect( data ).to.have.property( 'time' ).and.be.a( 'number' ).and.be.lte( 5.0 );
+		expect( data ).to.have.property( 'service' ).and.be.a( 'string' ).and.eq( 'unknown' );
+
+		expect( progress ).to.be.a( 'number' ).and.eq( 1 );
+
+		const key = `${ data.host }:${ data.port }`;
+		expect( done.has( key ) ).to.eq( true );
+		expect( done.get( key ) ).to.deep.eq( data );
+	} );
+
 	it( `should scan target ${ host } and determine "timeout"`, async () => {
 		const port = ports[ 0 ];
-		let d1, d2;
+		const scan = await new TCPConnect( {
+			host,
+			port,
+			timeout: 1,
+			debug: true,
+			onlyReportOpen: true
+		} ).scan();
 
-		d1 = await connect( host, port, { timeout: 1, onlyReportOpen: true } );
-
-		try {
-			await connect( host, port, {
-				timeout: 0,
-				connectionOpts: {
-					hints: ADDRCONFIG | V4MAPPED
-				}
-			} );
-		}
-		catch ( e ) {
-			d2 = e;
-		}
-
-		expect( d1 ).to.eq( undefined );
-
-		expect( d2 ).to.be.an( 'object' );
-		expect( d2 ).to.have.property( 'host' ).and.eq( host );
-		expect( d2 ).to.have.property( 'port' ).and.eq( port );
-		expect( d2 ).to.have.property( 'status' ).and.eq( 'closed' );
-		expect( d2 ).to.have.property( 'error' ).and.be.an.instanceOf( Error );
+		expect( scan ).to.be.an( 'object' );
+		expect( scan ).to.have.property( 'host' ).and.eq( host );
+		expect( scan ).to.have.property( 'port' ).and.eq( port );
+		expect( scan ).to.have.property( 'banner' ).and.eq( '' );
+		expect( scan ).to.have.property( 'error' ).and.eq( false );
+		expect( scan ).to.have.property( 'status' ).and.eq( 'closed (timeout)' );
+		expect( scan ).to.have.property( 'opened' ).and.eq( false );
 	} );
 
 	it( `should scan target ${ host } and determine "close"`, async () => {
@@ -173,6 +205,7 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 			host,
 			// throw this in to cover "to array" in constructor
 			ports: ports[ 0 ],
+			debug: true,
 			onlyReportOpen: false
 		} );
 
@@ -194,10 +227,12 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 		expect( data ).to.be.an( 'object' );
 		expect( data ).to.have.property( 'host' ).and.be.a( 'string' ).and.eq( host.split( '/' )[ 0 ] );
 		expect( data ).to.have.property( 'port' ).and.be.a( 'number' ).and.eq( ports[ 0 ] );
-		expect( data ).to.have.property( 'status' ).and.be.a( 'string' ).and.eq( 'closed' );
-		expect( data ).to.not.have.property( 'banner' );
-		expect( data ).to.not.have.property( 'time' );
-		expect( data ).to.not.have.property( 'service' );
+		expect( data ).to.have.property( 'banner' ).and.be.a( 'string' ).and.eq( '' );
+		expect( data ).to.have.property( 'error' ).and.be.a( 'boolean' ).and.eq( true );
+		expect( data ).to.have.property( 'status' ).and.be.a( 'string' ).and.eq( 'closed (refused)' );
+		expect( data ).to.have.property( 'opened' ).and.be.a( 'boolean' ).and.eq( false );
+		expect( data ).to.have.property( 'time' ).and.be.a( 'number' );
+		expect( data ).to.have.property( 'service' ).and.be.a( 'string' ).and.eq( 'unknown' );
 
 		expect( progress ).to.be.a( 'number' ).and.eq( 1 );
 
@@ -209,11 +244,9 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 	it( `should scan target ${ host } and determine "close" and not report it`, async () => {
 		server.close();
 
-		const start  = process.hrtime();
 		const result = new PortScanner( {
 			host,
 			ports,
-			debug: true,
 			onlyReportOpen: true
 		} );
 
@@ -228,9 +261,7 @@ describe( `${ process.env.npm_package_name } v${ process.env.npm_package_version
 			.on( 'done', ( d ) => done = d );
 
 		await result.scan();
-		const end = convertHighResolutionTime( process.hrtime( start ) );
 
-		expect( end ).to.be.lte( 10.0 );
 		expect( data ).to.be.an( 'array' );
 		expect( data ).to.deep.eq( [] );
 		expect( progress ).to.be.a( 'number' ).and.eq( 1 );
@@ -309,8 +340,10 @@ describe( [
 				expect( d.get( '127.0.0.1:22' ) ).to.deep.eq( {
 					host: '127.0.0.1',
 					port: 22,
-					status: 'open',
 					banner: 'SSH-2.0-OpenSSH_7.9\r\n',
+					error: false,
+					status: 'open',
+					opened: true,
 					service: 'ssh'
 				} );
 
