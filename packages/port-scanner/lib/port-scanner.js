@@ -375,6 +375,8 @@ class PortScanner extends EventEmitter
 					connect = new TCPConnect( { ...this.opts, host, port } );
 
 				// TODO::: implement https://github.com/mcollina/fastq
+				// 	jobs are completed with the original timeout and must be multithreaded to complete
+				// 	within set timeout value
 				jobs.push(
 					connect.scan()
 						.then( ( d ) => {
