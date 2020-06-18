@@ -367,38 +367,39 @@ class PortScanner extends EventEmitter
 			total = this.opts.cidr.size * this.opts.ports.length,
 			jobs  = [];
 
+		function worker( host, port ) {
+			const
+				connect = new TCPConnect( { ...this.opts, host, port } );
+
+			return connect.scan()
+				.then( ( data ) => {
+					if ( !data.opened && this.opts.onlyReportOpen ) {
+						return;
+					}
+
+					this.result.set( `${ host }:${ port }`, data );
+					this.emit( 'data', data );
+				} )
+				.catch( ( data ) => {
+					if ( !data.opened && this.opts.onlyReportOpen ) {
+						return;
+					}
+
+					this.result.set( `${ host }:${ port }`, data );
+					this.emit( 'data', data );
+				} )
+				.finally( () => {
+					this.emit( 'progress', ++progress / total );
+				} );
+		}
+
 		let progress = 0;
 		for ( const host of hosts ) {
 			for ( const port of PortScanner.portRangeIterator( this.opts.ports ) ) {
-				const
-					key     = `${ host }:${ port }`,
-					connect = new TCPConnect( { ...this.opts, host, port } );
-
 				// TODO::: implement https://github.com/mcollina/fastq
 				// 	jobs are completed with the original timeout and must be multithreaded to complete
 				// 	within set timeout value
-				jobs.push(
-					connect.scan()
-						.then( ( d ) => {
-							if ( !d.opened && this.opts.onlyReportOpen ) {
-								return;
-							}
-
-							this.result.set( key, d );
-							this.emit( 'data', d );
-						} )
-						.catch( ( d ) => {
-							if ( !d.opened && this.opts.onlyReportOpen ) {
-								return;
-							}
-
-							this.result.set( `${ host }:${ port }`, d );
-							this.emit( 'data', d );
-						} )
-						.finally( () => {
-							this.emit( 'progress', ++progress / total );
-						} )
-				);
+				jobs.push( worker.call( this, host, port ) );
 			}
 		}
 
