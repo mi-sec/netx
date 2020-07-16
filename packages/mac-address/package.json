@@ -11,7 +11,7 @@
 		"./": "./"
 	},
 	"scripts": {
-		"build": "gen-esm-wrapper ./lib/* ./esm/ip.mjs",
+		"build": "gen-esm-wrapper ./lib/* ./esm/mac-address.mjs",
 		"lint": "eslint .",
 		"test": "nyc --reporter=lcov --reporter=text-summary mocha",
 		"testd": "nyc mocha"
