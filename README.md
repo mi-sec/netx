@@ -18,10 +18,16 @@ npm i netx
 
 ```
 lerna clean
+lerna exec -- rm -rf ./esm
+lerna exec -- rm -rf ./node_models
+lerna exec -- rm -rf ./.nyc_output
+lerna exec -- rm -rf ./coverage
+lerna exec -- rm -rf ./package-lock.json
 lerna bootstrap
 lerna run lint
 lerna run test
 lerna run build
 # push any file changes
 lerna publish
+lerna publish --registry https://npm.pkg.github.com
 ```
