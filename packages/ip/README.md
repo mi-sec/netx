@@ -15,6 +15,7 @@ IP Address utility for parsing and validating IP Addresses
 import ip from '@mi-sec/ip';
 
 ip.validIPv4( '192.168.1.1' ) -> true
+ip.validIPv4( 'a.b.c.d' ) -> false
 ip.longToIp( 3232235777 ) -> 192.168.1.1
 ip.ipToLong( '192.168.1.1' ) -> 3232235777
 ```

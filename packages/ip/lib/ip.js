@@ -5,6 +5,13 @@
  *******************************************************************************************************/
 'use strict';
 
+/**
+ * validIPv4
+ * @description
+ * method to determine if an ip address is valid in compliance with [RFC 791](https://tools.ietf.org/html/rfc791)
+ * @param {string} ip - string to validate
+ * @return {boolean} - returns true if valid IPv4 address or "localhost"
+ */
 function validIPv4( ip ) {
 	if ( ip === 'localhost' ) {
 		return true;

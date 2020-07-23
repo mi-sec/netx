@@ -29,5 +29,5 @@ lerna run test
 lerna run build
 # push any file changes
 lerna publish
-lerna publish --registry https://npm.pkg.github.com
+lerna publish from-package --registry https://npm.pkg.github.com
 ```
