@@ -2,6 +2,7 @@
 
 netx is a collection of modules for network interactions
 
+![CodeQL](https://github.com/mi-sec/netx/workflows/CodeQL/badge.svg)
 [![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lerna.js.org/)
 
 - [1.0 - getting started](#getting-started)
