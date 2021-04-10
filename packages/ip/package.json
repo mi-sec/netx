@@ -1,6 +1,6 @@
 {
 	"name": "@mi-sec/ip",
-	"version": "1.0.6",
+	"version": "1.0.7",
 	"description": "IP Address utility",
 	"main": "./lib/ip.js",
 	"exports": {
